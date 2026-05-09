@@ -28,11 +28,11 @@ export async function exportAllTransactionsCSV(): Promise<void> {
     });
   }
 
-  const bigStart = new Date(2000, 0, 1);
-  const bigEnd = new Date(2100, 11, 31);
+  const exportStart = new Date(new Date().getFullYear() - 10, 0, 1);
+  const exportEnd = new Date(new Date().getFullYear() + 10, 11, 31);
 
   for (const rule of rules) {
-    const instances = generateRecurringInstances(rule, bigStart, bigEnd, exceptions);
+    const instances = generateRecurringInstances(rule, exportStart, exportEnd, exceptions);
     for (const inst of instances) {
       if (inst.isDeleted) continue;
       rows.push({
