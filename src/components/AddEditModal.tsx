@@ -99,7 +99,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
         initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="w-full sm:max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-white/50 dark:border-white/10 max-h-[90vh] overflow-y-auto relative z-10"
+        className="w-full sm:max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border border-white/50 dark:border-white/10 max-h-[90vh] overflow-y-auto relative z-10"
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
@@ -179,7 +179,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="flex gap-3">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-1.5 ml-1">Amount</label>
               <input
                 type="number"
@@ -229,8 +229,8 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
                   <option value="YEARLY">Yearly</option>
                 </select>
               </div>
-              <div className="flex gap-3">
-                <div className="flex-1">
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 min-w-0">
                   <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-1.5 ml-1">Start Date</label>
                   <input
                     type="date"
@@ -238,7 +238,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
                     className={inputClasses}
                   />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1 min-w-0">
                   <label className="block text-[11px] uppercase tracking-wider font-bold text-slate-500 dark:text-slate-400 mb-1.5 ml-1">End Date</label>
                   <input
                     type="date"

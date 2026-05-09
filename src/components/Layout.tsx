@@ -55,7 +55,7 @@ export function Layout({ children }: LayoutProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <main className="flex-1 overflow-y-auto z-0">
-          <div className="max-w-5xl mx-auto w-full min-h-full pb-32 md:pb-6">
+          <div className="max-w-5xl mx-auto w-full min-h-full pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] md:pt-6 pb-32 md:pb-6">
             {children}
           </div>
         </main>
