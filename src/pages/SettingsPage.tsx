@@ -2,6 +2,9 @@ import { useSettings } from '../hooks/useSettings';
 import { useCurrency } from '../hooks/useCurrency';
 import { exportAllTransactionsCSV, importTransactionsCSV } from '../utils/csv.utils';
 import type { Category } from '../db/model';
+import { GlassCard } from '../components/ui/GlassCard';
+import { GlassButton } from '../components/ui/GlassButton';
+import { motion } from 'framer-motion';
 
 export function SettingsPage() {
   const {
@@ -28,7 +31,7 @@ export function SettingsPage() {
     addCurrency, deleteCurrency, setDefaultCurrency,
   } = useCurrency(settings, currencies);
 
-  if (!data) return <div className="p-4">Loading...</div>;
+  if (!data) return <div className="p-6 text-slate-500 dark:text-slate-400 font-medium">Loading settings...</div>;
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -40,165 +43,200 @@ export function SettingsPage() {
     e.target.value = '';
   }
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="min-h-full bg-gray-50 dark:bg-gray-950">
-      <div className="px-4 py-5 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Settings</h1>
+    <div className="min-h-full bg-transparent">
+      <div className="px-4 md:px-6 py-6 sticky top-0 z-10 bg-white/40 dark:bg-black/20 backdrop-blur-xl border-b border-white/50 dark:border-white/10 shadow-sm shadow-indigo-900/5 dark:shadow-black/20">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Settings</h1>
       </div>
 
-      <div className="p-4 space-y-6">
-        <section className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Appearance</h2>
-          <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
-            {(['light', 'dark', 'system'] as const).map(t => (
-              <button
-                key={t}
-                onClick={() => updateTheme(t)}
-                className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors capitalize ${
-                  theme === t ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                {t}
-              </button>
-            ))}
-          </div>
-        </section>
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="p-4 md:p-6 space-y-6 max-w-3xl mx-auto"
+      >
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-6">
+            <h2 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-4">Appearance</h2>
+            <div className="flex rounded-xl bg-black/5 dark:bg-white/5 p-1 border border-black/5 dark:border-white/10">
+              {(['light', 'dark', 'system'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => updateTheme(t)}
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${
+                    theme === t 
+                      ? 'bg-white dark:bg-white/20 shadow-sm text-indigo-600 dark:text-white border border-white/50 dark:border-white/10' 
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                  }`}
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
 
-        <section className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Default Period</h2>
-          <div className="flex rounded-lg bg-gray-100 dark:bg-gray-800 p-1">
-            {(['week', 'month', 'year'] as const).map(p => (
-              <button
-                key={p}
-                onClick={() => setPeriodType(p)}
-                className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors capitalize ${
-                  periodType === p ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'
-                }`}
-              >
-                {p}
-              </button>
-            ))}
-          </div>
-        </section>
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-6">
+            <h2 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-4">Default Period</h2>
+            <div className="flex rounded-xl bg-black/5 dark:bg-white/5 p-1 border border-black/5 dark:border-white/10">
+              {(['week', 'month', 'year'] as const).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPeriodType(p)}
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${
+                    periodType === p 
+                      ? 'bg-white dark:bg-white/20 shadow-sm text-indigo-600 dark:text-white border border-white/50 dark:border-white/10' 
+                      : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
 
-        <section className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Currencies</h2>
-          <div className="space-y-2 mb-4">
-            {currencies.map(c => (
-              <div key={c.code} className="flex items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-800">
-                <div className="flex-1">
-                  <span className="font-medium text-gray-800 dark:text-gray-200">{c.symbol} {c.code}</span>
-                  <span className="text-xs text-gray-400 ml-2">Rate: {c.exchangeRateToUSD}</span>
-                  {c.isDefault && <span className="ml-2 text-xs bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded">Default</span>}
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-6">
+            <h2 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-4">Currencies</h2>
+            <div className="space-y-3 mb-6">
+              {currencies.map(c => (
+                <div key={c.code} className="flex items-center gap-3 py-3 border-b border-black/5 dark:border-white/5 last:border-0">
+                  <div className="flex-1">
+                    <div className="font-semibold text-slate-800 dark:text-white text-base tracking-tight">{c.symbol} {c.code}</div>
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Rate: {c.exchangeRateToUSD}</div>
+                  </div>
+                  {c.isDefault && <span className="text-xs font-bold bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 px-2 py-1 rounded-md border border-indigo-200 dark:border-indigo-500/30">Default</span>}
+                  {!c.isDefault && (
+                    <button onClick={() => setDefaultCurrency(c.code)} className="text-xs font-semibold text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Set Default</button>
+                  )}
+                  <button onClick={() => deleteCurrency(c.code)} className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors ml-2">Remove</button>
                 </div>
-                {!c.isDefault && (
-                  <button onClick={() => setDefaultCurrency(c.code)} className="text-xs text-indigo-500 hover:text-indigo-600">Set Default</button>
-                )}
-                <button onClick={() => deleteCurrency(c.code)} className="text-xs text-red-400 hover:text-red-500">Remove</button>
-              </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-3 gap-2">
-            <input
-              placeholder="Code (EUR)"
-              value={newCurrCode}
-              onChange={e => setNewCurrCode(e.target.value)}
-              className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
-            <input
-              placeholder="Symbol (€)"
-              value={newCurrSymbol}
-              onChange={e => setNewCurrSymbol(e.target.value)}
-              className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
-            <input
-              placeholder="Rate (1.08)"
-              value={newCurrRate}
-              onChange={e => setNewCurrRate(e.target.value)}
-              type="number"
-              min="0"
-              step="0.01"
-              className="px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
-          </div>
-          <button onClick={addCurrency} className="mt-2 w-full bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium">
-            Add Currency
-          </button>
-        </section>
+              ))}
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <input
+                placeholder="Code (EUR)"
+                value={newCurrCode}
+                onChange={e => setNewCurrCode(e.target.value)}
+                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              />
+              <input
+                placeholder="Symbol (€)"
+                value={newCurrSymbol}
+                onChange={e => setNewCurrSymbol(e.target.value)}
+                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              />
+              <input
+                placeholder="Rate (1.08)"
+                value={newCurrRate}
+                onChange={e => setNewCurrRate(e.target.value)}
+                type="number"
+                min="0"
+                step="0.01"
+                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              />
+            </div>
+            <GlassButton onClick={addCurrency} variant="primary" className="mt-4 w-full">
+              Add Currency
+            </GlassButton>
+          </GlassCard>
+        </motion.div>
 
-        <section className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Categories</h2>
-          <div className="space-y-1 mb-4">
-            {categories.map(cat => (
-              <div key={cat.id} className="flex items-center gap-2 py-2 border-b border-gray-100 dark:border-gray-800">
-                {editingCat?.id === cat.id ? (
-                  <>
-                    <input
-                      type="color"
-                      value={editingCat.color}
-                      onChange={e => setEditingCat({ ...editingCat, color: e.target.value })}
-                      className="w-8 h-8 rounded cursor-pointer border-0"
-                    />
-                    <input
-                      value={editingCat.name}
-                      onChange={e => setEditingCat({ ...editingCat, name: e.target.value })}
-                      className="flex-1 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                    />
-                    <button onClick={() => saveCategory(editingCat)} className="text-xs text-green-500">Save</button>
-                    <button onClick={() => setEditingCat(null)} className="text-xs text-gray-400">Cancel</button>
-                  </>
-                ) : (
-                  <>
-                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: cat.color }} />
-                    <span className="flex-1 text-sm text-gray-800 dark:text-gray-200">{cat.name}</span>
-                    <button onClick={() => setEditingCat(cat)} className="text-xs text-indigo-500">Edit</button>
-                    {!cat.isDefault && (
-                      <button onClick={() => deleteCategory(cat.id)} className="text-xs text-red-400">Delete</button>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <input
-              type="color"
-              value={newCatColor}
-              onChange={e => setNewCatColor(e.target.value)}
-              className="w-10 h-9 rounded cursor-pointer border border-gray-300 dark:border-gray-600"
-            />
-            <input
-              placeholder="Category name"
-              value={newCatName}
-              onChange={e => setNewCatName(e.target.value)}
-              className="flex-1 px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-            />
-            <button onClick={addCategory} className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium">Add</button>
-          </div>
-        </section>
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-6">
+            <h2 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-4">Categories</h2>
+            <div className="space-y-2 mb-6">
+              {categories.map(cat => (
+                <div key={cat.id} className="flex items-center gap-3 py-3 border-b border-black/5 dark:border-white/5 last:border-0">
+                  {editingCat?.id === cat.id ? (
+                    <>
+                      <input
+                        type="color"
+                        value={editingCat.color}
+                        onChange={e => setEditingCat({ ...editingCat, color: e.target.value })}
+                        className="w-8 h-8 rounded-full cursor-pointer border-0 p-0"
+                      />
+                      <input
+                        value={editingCat.name}
+                        onChange={e => setEditingCat({ ...editingCat, name: e.target.value })}
+                        className="flex-1 px-3 py-1.5 border border-black/10 dark:border-white/10 rounded-lg text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                      />
+                      <button onClick={() => saveCategory(editingCat)} className="text-xs font-bold text-emerald-500 px-2 py-1 bg-emerald-500/10 rounded-md">Save</button>
+                      <button onClick={() => setEditingCat(null)} className="text-xs font-bold text-slate-500 px-2 py-1 bg-slate-500/10 rounded-md">Cancel</button>
+                    </>
+                  ) : (
+                    <>
+                      <div className="w-4 h-4 rounded-full shadow-inner" style={{ backgroundColor: cat.color }} />
+                      <span className="flex-1 text-[15px] font-medium text-slate-800 dark:text-white">{cat.name}</span>
+                      <button onClick={() => setEditingCat(cat)} className="text-xs font-semibold text-indigo-500 hover:text-indigo-600 transition-colors">Edit</button>
+                      {!cat.isDefault && (
+                        <button onClick={() => deleteCategory(cat.id)} className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors ml-1">Delete</button>
+                      )}
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-3">
+              <input
+                type="color"
+                value={newCatColor}
+                onChange={e => setNewCatColor(e.target.value)}
+                className="w-11 h-11 rounded-xl cursor-pointer border-2 border-white dark:border-slate-800 shadow-sm p-0.5 bg-white/50 dark:bg-black/20"
+              />
+              <input
+                placeholder="Category name"
+                value={newCatName}
+                onChange={e => setNewCatName(e.target.value)}
+                className="flex-1 px-4 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+              />
+              <GlassButton onClick={addCategory} variant="secondary">Add</GlassButton>
+            </div>
+          </GlassCard>
+        </motion.div>
 
-        <section className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Data</h2>
-          <div className="space-y-2">
-            <button
-              onClick={async () => { setExporting(true); await exportAllTransactionsCSV(); setExporting(false); }}
-              disabled={exporting}
-              className="w-full bg-indigo-500 hover:bg-indigo-600 disabled:opacity-50 text-white py-2 rounded-lg text-sm font-medium"
-            >
-              {exporting ? 'Exporting...' : 'Export CSV'}
-            </button>
-            <label className="block w-full">
-              <span className="block w-full text-center bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-sm font-medium cursor-pointer">
-                Import CSV
-              </span>
-              <input type="file" accept=".csv" onChange={handleImport} className="hidden" />
-            </label>
-            {importStatus && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 text-center">{importStatus}</p>
-            )}
-          </div>
-        </section>
-      </div>
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-6">
+            <h2 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-4">Data Management</h2>
+            <div className="space-y-3">
+              <GlassButton
+                onClick={async () => { setExporting(true); await exportAllTransactionsCSV(); setExporting(false); }}
+                disabled={exporting}
+                variant="primary"
+                className="w-full"
+              >
+                {exporting ? 'Exporting...' : 'Export to CSV'}
+              </GlassButton>
+              <label className="block w-full">
+                <div className="w-full text-center border border-black/10 dark:border-white/10 hover:bg-white/40 dark:hover:bg-white/5 text-slate-800 dark:text-white py-2.5 rounded-2xl text-base font-medium cursor-pointer transition-colors backdrop-blur-md">
+                  Import from CSV
+                </div>
+                <input type="file" accept=".csv" onChange={handleImport} className="hidden" />
+              </label>
+              {importStatus && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-medium text-slate-500 dark:text-slate-400 text-center mt-3">
+                  {importStatus}
+                </motion.p>
+              )}
+            </div>
+          </GlassCard>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

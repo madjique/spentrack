@@ -1,45 +1,15 @@
 import { type ReactNode } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { LayoutDashboard, ArrowRightLeft, Plus, Settings } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { cn } from '../utils/cn';
+import { motion } from 'framer-motion';
 
 const navItems = [
-  {
-    to: '/',
-    label: 'Dashboard',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-      </svg>
-    ),
-  },
-  {
-    to: '/list',
-    label: 'Transactions',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-      </svg>
-    ),
-  },
-  {
-    to: '/add',
-    label: 'Add',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-      </svg>
-    ),
-  },
-  {
-    to: '/settings',
-    label: 'Settings',
-    icon: (
-      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
+  { to: '/', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
+  { to: '/list', label: 'Transactions', icon: <ArrowRightLeft className="w-5 h-5" /> },
+  { to: '/add', label: 'Add', icon: <Plus className="w-5 h-5" /> },
+  { to: '/settings', label: 'Settings', icon: <Settings className="w-5 h-5" /> },
 ];
 
 interface LayoutProps {
@@ -48,57 +18,97 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   useTheme();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const isAddRoute = location.pathname === '/add';
+  const showFab = location.pathname === '/' || location.pathname === '/list';
+  const bottomNavItems = navItems.filter(item => item.to !== '/add');
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950">
-      <nav className="hidden md:flex flex-col w-56 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 py-6 px-3">
-        <div className="px-3 mb-6">
-          <h1 className="text-xl font-bold text-indigo-600 dark:text-indigo-400">SpenTrack</h1>
+    <div className="flex h-screen bg-transparent">
+      {/* Desktop Sidebar (Glass) */}
+      <nav className="hidden md:flex flex-col w-64 bg-white/40 dark:bg-black/20 backdrop-blur-2xl border-r border-white/50 dark:border-white/10 py-8 px-4 z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.2)]">
+        <div className="px-4 mb-10">
+          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-cyan-500 dark:from-indigo-400 dark:to-cyan-400 tracking-tight">SpenTrack</h1>
         </div>
-        {navItems.map(item => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'
-                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-              }`
-            }
-          >
-            {item.icon}
-            {item.label}
-          </NavLink>
-        ))}
+        <div className="flex flex-col gap-2">
+          {navItems.map(item => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-4 px-4 py-3 rounded-2xl text-[15px] font-medium transition-all duration-300",
+                  isActive
+                    ? 'bg-white/60 dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm border border-white/50 dark:border-white/5'
+                    : 'text-slate-600 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'
+                )
+              }
+            >
+              {item.icon}
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <main className="flex-1 overflow-y-auto pb-16 md:pb-0">
-          {children}
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden relative">
+        <main className="flex-1 overflow-y-auto z-0">
+          <div className="max-w-5xl mx-auto w-full min-h-full pb-32 md:pb-6">
+            {children}
+          </div>
         </main>
       </div>
 
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex z-40">
-        {navItems.map(item => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.to === '/'}
-            className={({ isActive }) =>
-              `flex-1 flex flex-col items-center py-2 text-xs font-medium transition-colors ${
-                isActive
-                  ? 'text-indigo-600 dark:text-indigo-400'
-                  : 'text-gray-500 dark:text-gray-400'
-              }`
-            }
+      {/* Mobile Floating Bottom Nav (Glass Pill) */}
+      {!isAddRoute && (
+        <div className="md:hidden fixed bottom-6 left-4 right-4 z-40">
+        <motion.nav
+          initial={{ y: 100, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-3xl flex p-2 shadow-xl shadow-indigo-900/5 dark:shadow-black/40"
+        >
+          {bottomNavItems.map(item => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/'}
+              className={({ isActive }) =>
+                cn(
+                  "flex-1 flex flex-col items-center justify-center py-2 rounded-2xl transition-all duration-300",
+                  isActive
+                    ? 'bg-white/50 dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                    : 'text-slate-500 dark:text-slate-400'
+                )
+              }
+            >
+              <div className="mb-1">{item.icon}</div>
+              <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+            </NavLink>
+          ))}
+        </motion.nav>
+      </div>
+      )}
+
+      {/* Floating Action Button (Mobile) */}
+      {showFab && (
+        <div className="md:hidden fixed bottom-[104px] right-6 z-40">
+          <motion.button
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate('/add')}
+            className="w-14 h-14 bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(79,70,229,0.3)] backdrop-blur-md border border-white/20 transition-all duration-300"
           >
-            {item.icon}
-            <span className="mt-0.5">{item.label}</span>
-          </NavLink>
-        ))}
-      </nav>
+            <Plus className="w-6 h-6" />
+          </motion.button>
+        </div>
+      )}
     </div>
   );
 }

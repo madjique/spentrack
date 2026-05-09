@@ -12,6 +12,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  deployments: write
 
 concurrency:
   group: pages
@@ -40,7 +41,7 @@ jobs:
         run: npm ci
 
       - name: Bump version in package.json
-        run: npm version ${{ github.event.inputs.version }} --no-git-tag-version
+        run: npm version ${{ github.event.inputs.version }} --no-git-tag-version --allow-same-version
 
       - name: Commit version bump
         run: |

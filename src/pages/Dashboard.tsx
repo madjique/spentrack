@@ -1,111 +1,179 @@
-import { useTransactions } from '../hooks/useTransactions';
-import { convertAmount } from '../utils/currency.utils';
-import { PeriodHeader } from '../components/PeriodHeader';
-import { DonutChart } from '../components/DonutChart';
 import { useState } from 'react';
+import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { useTransactions, type AnyTx } from '../hooks/useTransactions';
+import { PeriodHeader } from '../components/PeriodHeader';
+import { TransactionItem } from '../components/TransactionItem';
 import { AddEditModal } from '../components/AddEditModal';
+import { GlassCard } from '../components/ui/GlassCard';
+import { motion } from 'framer-motion';
 import type { Transaction } from '../db/model';
 import type { VirtualTransaction } from '../utils/transaction.utils';
 
 export function Dashboard() {
-  const { isLoading, allTx, currencies, categories, categoryMap, activeCurrencyCode } = useTransactions();
+  const {
+    isLoading,
+    allTx,
+    activeCurrencyCode,
+    currencies,
+    categoryMap,
+    categories
+  } = useTransactions();
 
-  const [editTx, setEditTx] = useState<Transaction | undefined>();
-  const [editVirtual, setEditVirtual] = useState<VirtualTransaction | undefined>();
+  const [selectedTx, setSelectedTx] = useState<Transaction | undefined>();
+  const [selectedVirtual, setSelectedVirtual] = useState<VirtualTransaction | undefined>();
   const [showModal, setShowModal] = useState(false);
 
-  if (isLoading) return <div className="p-4 text-gray-500 dark:text-gray-400">Loading...</div>;
+  if (isLoading || !categories) return <div className="p-6 text-slate-500 dark:text-slate-400 font-medium">Loading your dashboard...</div>;
 
-  const activeCurrency = currencies.find(c => c.code === activeCurrencyCode) ?? currencies[0];
+  const expenses = allTx.filter((tx: AnyTx) => tx.type === 'EXPENSE');
+  const incomes = allTx.filter((tx: AnyTx) => tx.type === 'INCOME');
+  
+  const totalSpent = expenses.reduce((sum: number, tx: AnyTx) => sum + tx.amount, 0);
+  const totalIncome = incomes.reduce((sum: number, tx: AnyTx) => sum + tx.amount, 0);
 
-  const expenseTx = allTx.filter(tx => tx.type === 'EXPENSE');
-  const incomeTx = allTx.filter(tx => tx.type === 'INCOME');
-
-  const totalExpense = expenseTx.reduce((sum, tx) => sum + convertAmount(tx.amount, tx.currencyCode, activeCurrencyCode, currencies), 0);
-  const totalIncome = incomeTx.reduce((sum, tx) => sum + convertAmount(tx.amount, tx.currencyCode, activeCurrencyCode, currencies), 0);
-
-  const byCategory: Record<string, number> = {};
-  for (const tx of expenseTx) {
-    const converted = convertAmount(tx.amount, tx.currencyCode, activeCurrencyCode, currencies);
-    byCategory[tx.categoryId] = (byCategory[tx.categoryId] ?? 0) + converted;
+  const catTotals = new Map<string, number>();
+  
+  for (const exp of expenses) {
+    const amount = exp.amount;
+    const catId = exp.categoryId;
+    catTotals.set(catId, (catTotals.get(catId) ?? 0) + amount);
   }
 
-  const chartData = Object.entries(byCategory)
-    .map(([catId, value]) => ({
-      name: categoryMap.get(catId)?.name ?? 'Other',
-      value: parseFloat(value.toFixed(2)),
-      color: categoryMap.get(catId)?.color ?? '#94a3b8',
-    }))
+  const chartData = Array.from(catTotals.entries())
+    .map(([catId, amount]) => {
+      const c = categoryMap.get(catId);
+      return {
+        name: c?.name ?? 'Unknown',
+        value: amount,
+        color: c?.color ?? '#ccc'
+      };
+    })
     .sort((a, b) => b.value - a.value);
 
+  const activeCurrency = currencies.find((c: any) => c.code === activeCurrencyCode);
+
+  function handleClick(tx: AnyTx) {
+    if ('isRecurring' in tx && tx.isRecurring) {
+      setSelectedVirtual(tx as VirtualTransaction);
+    } else {
+      setSelectedTx(tx as Transaction);
+    }
+    setShowModal(true);
+  }
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } }
+  };
+
   return (
-    <div className="min-h-full bg-gray-50 dark:bg-gray-950">
+    <div className="min-h-full bg-transparent flex flex-col">
       <PeriodHeader />
-
-      <div className="p-4 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Expenses</div>
-            <div className="text-xl font-bold text-gray-900 dark:text-gray-100">
-              {activeCurrency?.symbol ?? '$'}{totalExpense.toFixed(2)}
-            </div>
-          </div>
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Income</div>
-            <div className="text-xl font-bold text-green-500">
-              {activeCurrency?.symbol ?? '$'}{totalIncome.toFixed(2)}
-            </div>
-          </div>
+      
+      <motion.div 
+        variants={containerVariants}
+        initial="hidden"
+        animate="show"
+        className="flex-1 p-4 md:p-6 space-y-6 max-w-5xl mx-auto w-full"
+      >
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 gap-4">
+          <motion.div variants={itemVariants}>
+            <GlassCard className="p-5 flex flex-col justify-center border-emerald-500/20 dark:border-emerald-500/10 shadow-emerald-900/5">
+              <span className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-1">Income</span>
+              <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+                {activeCurrency?.symbol}{totalIncome.toFixed(2)}
+              </span>
+            </GlassCard>
+          </motion.div>
+          <motion.div variants={itemVariants}>
+            <GlassCard className="p-5 flex flex-col justify-center border-rose-500/20 dark:border-rose-500/10 shadow-rose-900/5">
+              <span className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-1">Expenses</span>
+              <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                {activeCurrency?.symbol}{totalSpent.toFixed(2)}
+              </span>
+            </GlassCard>
+          </motion.div>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Net Balance</div>
-          <div className={`text-2xl font-bold ${totalIncome - totalExpense >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-            {activeCurrency?.symbol ?? '$'}{(totalIncome - totalExpense).toFixed(2)}
-          </div>
-        </div>
+        {/* Chart */}
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-6 h-72 flex flex-col border border-white/60 dark:border-white/10">
+            <h3 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase mb-4">Spending by Category</h3>
+            {chartData.length > 0 ? (
+              <div className="flex-1 -mx-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={65}
+                      outerRadius={85}
+                      paddingAngle={4}
+                      stroke="none"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      formatter={(value: any) => [`${activeCurrency?.symbol}${Number(value).toFixed(2)}`, 'Amount']}
+                      contentStyle={{ borderRadius: '16px', border: 'none', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
+                      itemStyle={{ fontWeight: 600, color: '#0f172a' }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-slate-400 font-medium">
+                No data to display
+              </div>
+            )}
+          </GlassCard>
+        </motion.div>
 
-        {chartData.length > 0 && (
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Expenses by Category</h3>
-            <DonutChart data={chartData} currencySymbol={activeCurrency?.symbol ?? '$'} />
-          </div>
-        )}
-
-        {chartData.length > 0 && (
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-4 shadow-sm">
-            <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Top Categories</h3>
-            <div className="space-y-2">
-              {chartData.slice(0, 5).map(item => (
-                <div key={item.name} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                  <div className="flex-1 text-sm text-gray-700 dark:text-gray-300">{item.name}</div>
-                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                    {activeCurrency?.symbol ?? '$'}{item.value.toFixed(2)}
-                  </div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500 w-10 text-right">
-                    {totalExpense > 0 ? ((item.value / totalExpense) * 100).toFixed(0) : 0}%
-                  </div>
-                </div>
+        <motion.div variants={itemVariants}>
+          <GlassCard className="p-0 overflow-hidden">
+            <div className="px-5 py-4 border-b border-black/5 dark:border-white/5 bg-white/40 dark:bg-white/5">
+              <h3 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">Recent Transactions</h3>
+            </div>
+            <div className="divide-y divide-black/5 dark:divide-white/5">
+              {allTx.slice(0, 5).map((tx: AnyTx) => (
+                <TransactionItem
+                  key={tx.id}
+                  transaction={tx as AnyTx & { isRecurring?: false }}
+                  category={categoryMap.get(tx.categoryId)}
+                  currencies={currencies}
+                  activeCurrencyCode={activeCurrencyCode}
+                  onClick={() => handleClick(tx)}
+                />
               ))}
+              {allTx.length === 0 && (
+                <div className="p-8 text-center text-slate-500 font-medium">
+                  No transactions found
+                </div>
+              )}
             </div>
-          </div>
-        )}
-
-        {chartData.length === 0 && (
-          <div className="bg-white dark:bg-gray-900 rounded-xl p-8 shadow-sm text-center">
-            <div className="text-4xl mb-2">💸</div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">No transactions for this period</p>
-            <p className="text-gray-400 dark:text-gray-500 text-xs mt-1">Tap + to add your first transaction</p>
-          </div>
-        )}
-      </div>
+          </GlassCard>
+        </motion.div>
+      </motion.div>
 
       {showModal && (
         <AddEditModal
-          onClose={() => { setShowModal(false); setEditTx(undefined); setEditVirtual(undefined); }}
-          editTransaction={editTx}
-          editVirtual={editVirtual}
+          onClose={() => { setShowModal(false); setSelectedTx(undefined); setSelectedVirtual(undefined); }}
+          editTransaction={selectedTx}
+          editVirtual={selectedVirtual}
           categories={categories}
           currencies={currencies}
         />
