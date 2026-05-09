@@ -50,6 +50,14 @@ export function useSettings() {
     await db.settings.put({ ...settings, theme: t });
   }
 
+  async function clearAllData() {
+    if (confirm('Are you sure you want to delete all transactions and recurring rules? This cannot be undone.')) {
+      await db.transactions.clear();
+      await db.recurringRules.clear();
+      await db.recurringExceptions.clear();
+    }
+  }
+
   return {
     theme,
     periodType,
@@ -69,5 +77,6 @@ export function useSettings() {
     saveCategory,
     deleteCategory,
     updateTheme,
+    clearAllData,
   };
 }

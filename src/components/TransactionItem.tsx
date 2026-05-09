@@ -31,14 +31,12 @@ export function TransactionItem({ transaction, category, currencies, activeCurre
       />
       <div className="flex-1 min-w-0">
         <div className="text-[15px] font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-1.5">
-          {category?.name ?? 'Unknown'}
+          {transaction.note || category?.name || 'Unknown'}
           {'isRecurring' in transaction && transaction.isRecurring && (
             <Repeat className="w-3.5 h-3.5 text-primary opacity-60" />
           )}
         </div>
-        {transaction.note && (
-          <div className="text-[13px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">{transaction.note}</div>
-        )}
+        <div className="text-[13px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">{category?.name ?? 'Unknown'}</div>
       </div>
       <div className={`text-[16px] font-black flex-shrink-0 tracking-tight ${transaction.type === 'INCOME' ? 'text-emerald-500' : 'text-slate-900 dark:text-white'}`}>
         {transaction.type === 'INCOME' ? '+' : '-'}{activeCurrency?.symbol ?? '$'}{convertedAmount.toFixed(2)}

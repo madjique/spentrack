@@ -72,6 +72,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
     saveRecurringRule,
     saveRecurringEdit,
     handleDelete,
+    handleDeleteAll,
   } = useSpending({ onClose, editTransaction, editRecurring, editVirtual });
 
   const onSubmit = async (values: FormValues) => {
@@ -282,16 +283,28 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
 
           <div className="flex gap-3 pt-4">
             {isEditing && !showScopeDialog && (
-              <GlassButton
-                type="button"
-                onClick={handleDelete}
-                variant={deleteConfirm ? "danger" : "ghost"}
-                className={deleteConfirm ? "" : "text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 border-rose-500/30"}
-              >
-                {deleteConfirm ? 'Confirm Delete' : 'Delete'}
-              </GlassButton>
+              <>
+                <GlassButton
+                  type="button"
+                  onClick={handleDelete}
+                  variant={deleteConfirm ? "danger" : "ghost"}
+                  className={deleteConfirm ? "flex-1" : "text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 border-rose-500/30"}
+                >
+                  {deleteConfirm ? (editVirtual ? 'Delete This' : 'Confirm Delete') : 'Delete'}
+                </GlassButton>
+                {deleteConfirm && editVirtual && (
+                  <GlassButton
+                    type="button"
+                    onClick={handleDeleteAll}
+                    variant="danger"
+                    className="flex-1"
+                  >
+                    Delete All
+                  </GlassButton>
+                )}
+              </>
             )}
-            {!showScopeDialog && (
+            {!showScopeDialog && (!deleteConfirm || !editVirtual) && (
               <GlassButton
                 type="submit"
                 variant="primary"

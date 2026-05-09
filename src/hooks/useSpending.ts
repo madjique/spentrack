@@ -149,6 +149,14 @@ export function useSpending({
     }
   }
 
+  async function handleDeleteAll() {
+    if (editVirtual) {
+      await db.recurringRules.delete(editVirtual.ruleId);
+      await db.recurringExceptions.where('ruleId').equals(editVirtual.ruleId).delete();
+      onClose();
+    }
+  }
+
   return {
     deleteConfirm,
     showScopeDialog,
@@ -159,5 +167,6 @@ export function useSpending({
     saveRecurringRule,
     saveRecurringEdit,
     handleDelete,
+    handleDeleteAll,
   };
 }

@@ -17,7 +17,7 @@ export function SettingsPage() {
     editingCat, setEditingCat,
     importStatus, setImportStatus,
     exporting, setExporting,
-    addCategory, saveCategory, deleteCategory, updateTheme,
+    addCategory, saveCategory, deleteCategory, updateTheme, clearAllData,
   } = useSettings();
 
   const settings = data?.settings;
@@ -222,6 +222,15 @@ export function SettingsPage() {
                 </div>
                 <input type="file" accept=".csv" onChange={handleImport} className="hidden" />
               </label>
+              <div className="pt-2">
+                <GlassButton
+                  onClick={clearAllData}
+                  variant="danger"
+                  className="w-full"
+                >
+                  Clear All Data
+                </GlassButton>
+              </div>
               {importStatus && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-xs font-medium text-slate-500 dark:text-slate-400 text-center mt-3">
                   {importStatus}
