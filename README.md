@@ -1,6 +1,6 @@
 # SpenTrack — Personal Expense Tracker PWA
 
-A fully offline-capable Personal Expense Tracker built with React 18, Vite, TypeScript, and Tailwind CSS.
+A fully offline-capable Personal Expense Tracker built with React 19, Vite, TypeScript, and Tailwind CSS.
 
 ## Features
 
@@ -17,7 +17,7 @@ A fully offline-capable Personal Expense Tracker built with React 18, Vite, Type
 
 | Layer | Library |
 |-------|---------|
-| UI | React 18 + TypeScript |
+| UI | React 19 + TypeScript |
 | Build | Vite + `@tailwindcss/vite` |
 | Styling | Tailwind CSS v4 (dark mode via `class`) |
 | PWA | `vite-plugin-pwa` + Workbox |
@@ -26,7 +26,7 @@ A fully offline-capable Personal Expense Tracker built with React 18, Vite, Type
 | Charts | Recharts |
 | Dates | date-fns |
 | CSV | PapaParse |
-| Routing | react-router-dom v6 |
+| Routing | react-router-dom v7 |
 
 ## Getting Started
 
