@@ -3,12 +3,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db/database';
 import { useAppStore } from '../store/useAppStore';
 import type { Category } from '../db/model';
+import { COLORS } from '../utils/theme';
 
 export function useSettings() {
   const { theme, setTheme, periodType, setPeriodType } = useAppStore();
 
   const [newCatName, setNewCatName] = useState('');
-  const [newCatColor, setNewCatColor] = useState('#6366f1');
+  const [newCatColor, setNewCatColor] = useState(COLORS.primary);
   const [editingCat, setEditingCat] = useState<Category | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
@@ -30,7 +31,7 @@ export function useSettings() {
       isDefault: false,
     });
     setNewCatName('');
-    setNewCatColor('#6366f1');
+    setNewCatColor(COLORS.primary);
   }
 
   async function saveCategory(cat: Category) {

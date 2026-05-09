@@ -12,7 +12,7 @@ export function PeriodHeader() {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2 bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-3xl shadow-xl shadow-indigo-900/5 dark:shadow-black/40"
+        className="flex flex-col sm:flex-row items-center justify-between gap-4 p-2 bg-white/40 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-3xl shadow-xl shadow-primary/5 dark:shadow-black/40"
       >
         <div className="flex gap-1 p-1 bg-white/40 dark:bg-white/5 rounded-2xl w-full sm:w-auto">
           {(['week', 'month', 'year'] as const).map(pt => (
@@ -22,7 +22,7 @@ export function PeriodHeader() {
               className={cn(
                 "flex-1 sm:flex-none px-4 py-1.5 rounded-xl text-sm font-semibold transition-all duration-300",
                 periodType === pt
-                  ? "bg-white dark:bg-white/20 text-indigo-600 dark:text-indigo-400 shadow-sm border border-white/60 dark:border-white/10"
+                  ? "bg-white dark:bg-white/20 text-primary shadow-sm border border-white/60 dark:border-white/10"
                   : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-white/10 border border-transparent"
               )}
             >

@@ -4,6 +4,7 @@ import { LayoutDashboard, ArrowRightLeft, Plus, Settings } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../utils/cn';
 import { motion } from 'framer-motion';
+import { COLORS, hexToRgba } from '../utils/theme';
 
 const navItems = [
   { to: '/', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
@@ -29,9 +30,6 @@ export function Layout({ children }: LayoutProps) {
     <div className="flex h-screen bg-transparent">
       {/* Desktop Sidebar (Glass) */}
       <nav className="hidden md:flex flex-col w-64 bg-white/40 dark:bg-black/20 backdrop-blur-2xl border-r border-white/50 dark:border-white/10 py-8 px-4 z-10 shadow-[4px_0_24px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_rgba(0,0,0,0.2)]">
-        <div className="px-4 mb-10">
-          <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-cyan-500 dark:from-indigo-400 dark:to-cyan-400 tracking-tight">SpenTrack</h1>
-        </div>
         <div className="flex flex-col gap-2">
           {navItems.map(item => (
             <NavLink
@@ -42,7 +40,7 @@ export function Layout({ children }: LayoutProps) {
                 cn(
                   "flex items-center gap-4 px-4 py-3 rounded-2xl text-[15px] font-medium transition-all duration-300",
                   isActive
-                    ? 'bg-white/60 dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm border border-white/50 dark:border-white/5'
+                    ? 'bg-white/60 dark:bg-white/10 text-primary shadow-sm border border-white/50 dark:border-white/5'
                     : 'text-slate-600 dark:text-slate-400 hover:bg-white/40 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'
                 )
               }
@@ -66,32 +64,32 @@ export function Layout({ children }: LayoutProps) {
       {/* Mobile Floating Bottom Nav (Glass Pill) */}
       {!isAddRoute && (
         <div className="md:hidden fixed bottom-6 left-4 right-4 z-40">
-        <motion.nav
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-3xl flex p-2 shadow-xl shadow-indigo-900/5 dark:shadow-black/40"
-        >
-          {bottomNavItems.map(item => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              className={({ isActive }) =>
-                cn(
-                  "flex-1 flex flex-col items-center justify-center py-2 rounded-2xl transition-all duration-300",
-                  isActive
-                    ? 'bg-white/50 dark:bg-white/10 text-indigo-600 dark:text-indigo-400 shadow-sm'
-                    : 'text-slate-500 dark:text-slate-400'
-                )
-              }
-            >
-              <div className="mb-1">{item.icon}</div>
-              <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
-            </NavLink>
-          ))}
-        </motion.nav>
-      </div>
+          <motion.nav
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-3xl flex p-2 shadow-xl shadow-primary/5 dark:shadow-black/40"
+          >
+            {bottomNavItems.map(item => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.to === '/'}
+                className={({ isActive }) =>
+                  cn(
+                    "flex-1 flex flex-col items-center justify-center py-2 rounded-2xl transition-all duration-300",
+                    isActive
+                      ? 'bg-white/50 dark:bg-white/10 text-primary shadow-sm'
+                      : 'text-slate-500 dark:text-slate-400'
+                  )
+                }
+              >
+                <div className="mb-1">{item.icon}</div>
+                <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
+              </NavLink>
+            ))}
+          </motion.nav>
+        </div>
       )}
 
       {/* Floating Action Button (Mobile) */}
@@ -103,7 +101,7 @@ export function Layout({ children }: LayoutProps) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate('/add')}
-            className="w-14 h-14 bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white rounded-full flex items-center justify-center shadow-[0_8px_30px_rgb(79,70,229,0.3)] backdrop-blur-md border border-white/20 transition-all duration-300"
+            className={`w-14 h-14 bg-primary hover:bg-primary/90 text-white dark:text-slate-900 rounded-full flex items-center justify-center shadow-[0_8px_30px_${hexToRgba(COLORS.primary, 0.3)}] backdrop-blur-md border border-white/20 transition-all duration-300`}
           >
             <Plus className="w-6 h-6" />
           </motion.button>

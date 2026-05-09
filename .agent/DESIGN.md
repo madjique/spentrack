@@ -44,7 +44,9 @@ The "Liquid Glass" effect requires the background to be colorful enough to show 
 *   **Glass Border:** `border border-white/10` (Crucial for the glass edge highlight).
 *   **Text Primary:** `text-white`
 *   **Text Secondary:** `text-white/60`
-*   **Accent (Buttons/Active state):** Neon Cyan (`#06b6d4`) or Electric Indigo (`#6366f1`) with a soft glow (`shadow-[0_0_15px_rgba(6,182,212,0.4)]`).
+*   **Primary Accent:** Vibrant Green (`#00D378`) - Defined as `primary` in `theme.ts` and `index.css`. Used for primary actions.
+*   **Secondary Accent:** Electric Blue (`#14C8FF`) - Defined as `secondary`. Used for highlights.
+*   **Aesthetic:** Neon glow effects and adaptive text (White in light mode, Dark in dark mode for primary buttons).
 
 ### Light Mode (Clean & Frosted)
 *   **App Background:** Soft Pastel Mesh Gradient (e.g., `#f8fafc` mixed with soft pinks `#fce7f3` and blues `#e0f2fe`).

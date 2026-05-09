@@ -83,7 +83,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
     }
   };
 
-  const inputClasses = "w-full px-4 py-3 border border-black/10 dark:border-white/10 rounded-2xl bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 backdrop-blur-md transition-all";
+  const inputClasses = "w-full px-4 py-3 border border-black/10 dark:border-white/10 rounded-2xl bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md transition-all";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -119,7 +119,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
                 onClick={() => setValue('mode', m)}
                 className={`flex-1 py-2 text-[13px] font-bold tracking-wide uppercase rounded-xl transition-all ${
                   mode === m 
-                    ? 'bg-white dark:bg-white/20 shadow-sm text-indigo-600 dark:text-white border border-white/50 dark:border-white/10' 
+                    ? 'bg-white dark:bg-white/20 shadow-sm text-primary dark:text-white border border-white/50 dark:border-white/10' 
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -149,8 +149,8 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
         </div>
 
         {showScopeDialog && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6 p-4 bg-indigo-50/80 dark:bg-indigo-900/30 rounded-2xl border border-indigo-100 dark:border-indigo-500/20 backdrop-blur-md">
-            <p className="text-sm font-bold text-indigo-900 dark:text-indigo-100 mb-3">Edit which occurrences?</p>
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="mb-6 p-4 bg-primary/10 dark:bg-primary/20 rounded-2xl border border-primary/20 dark:border-primary/20 backdrop-blur-md">
+            <p className="text-sm font-bold text-primary dark:text-primary/90 mb-3">Edit which occurrences?</p>
             {(['this', 'forward', 'all'] as const).map(scope => (
               <label key={scope} className="flex items-center gap-3 mb-2 cursor-pointer group">
                 <input
@@ -159,9 +159,9 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
                   value={scope}
                   checked={recurringScope === scope}
                   onChange={() => setRecurringScope(scope)}
-                  className="w-4 h-4 text-indigo-500 border-indigo-300 focus:ring-indigo-500"
+                  className="w-4 h-4 text-primary border-primary/30 focus:ring-primary"
                 />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300 group-hover:text-primary transition-colors">
                   {scope === 'this' ? 'This instance only' : scope === 'forward' ? 'This and future instances' : 'All instances'}
                 </span>
               </label>

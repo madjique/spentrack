@@ -58,7 +58,7 @@ export function SettingsPage() {
 
   return (
     <div className="min-h-full bg-transparent">
-      <div className="px-4 md:px-6 py-6 sticky top-0 z-10 bg-white/40 dark:bg-black/20 backdrop-blur-xl border-b border-white/50 dark:border-white/10 shadow-sm shadow-indigo-900/5 dark:shadow-black/20">
+      <div className="px-4 md:px-6 py-6 sticky top-0 z-10 bg-white/40 dark:bg-black/20 backdrop-blur-xl border-b border-white/50 dark:border-white/10 shadow-sm shadow-primary/5 dark:shadow-black/20">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Settings</h1>
       </div>
 
@@ -78,7 +78,7 @@ export function SettingsPage() {
                   onClick={() => updateTheme(t)}
                   className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${
                     theme === t 
-                      ? 'bg-white dark:bg-white/20 shadow-sm text-indigo-600 dark:text-white border border-white/50 dark:border-white/10' 
+                      ? 'bg-white dark:bg-white/20 shadow-sm text-primary dark:text-white border border-white/50 dark:border-white/10' 
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
                   }`}
                 >
@@ -99,7 +99,7 @@ export function SettingsPage() {
                   onClick={() => setPeriodType(p)}
                   className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${
                     periodType === p 
-                      ? 'bg-white dark:bg-white/20 shadow-sm text-indigo-600 dark:text-white border border-white/50 dark:border-white/10' 
+                      ? 'bg-white dark:bg-white/20 shadow-sm text-primary dark:text-white border border-white/50 dark:border-white/10' 
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
                   }`}
                 >
@@ -120,9 +120,9 @@ export function SettingsPage() {
                     <div className="font-semibold text-slate-800 dark:text-white text-base tracking-tight">{c.symbol} {c.code}</div>
                     <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Rate: {c.exchangeRateToUSD}</div>
                   </div>
-                  {c.isDefault && <span className="text-xs font-bold bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 px-2 py-1 rounded-md border border-indigo-200 dark:border-indigo-500/30">Default</span>}
+                  {c.isDefault && <span className="text-xs font-bold bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary/90 px-2 py-1 rounded-md border border-primary/20 dark:border-primary/30">Default</span>}
                   {!c.isDefault && (
-                    <button onClick={() => setDefaultCurrency(c.code)} className="text-xs font-semibold text-indigo-500 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Set Default</button>
+                    <button onClick={() => setDefaultCurrency(c.code)} className="text-xs font-semibold text-primary hover:text-primary/80 dark:hover:text-primary transition-colors">Set Default</button>
                   )}
                   <button onClick={() => deleteCurrency(c.code)} className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors ml-2">Remove</button>
                 </div>
@@ -133,13 +133,13 @@ export function SettingsPage() {
                 placeholder="Code (EUR)"
                 value={newCurrCode}
                 onChange={e => setNewCurrCode(e.target.value)}
-                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <input
                 placeholder="Symbol (€)"
                 value={newCurrSymbol}
                 onChange={e => setNewCurrSymbol(e.target.value)}
-                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <input
                 placeholder="Rate (1.08)"
@@ -148,7 +148,7 @@ export function SettingsPage() {
                 type="number"
                 min="0"
                 step="0.01"
-                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="px-3 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
             </div>
             <GlassButton onClick={addCurrency} variant="primary" className="mt-4 w-full">
@@ -174,7 +174,7 @@ export function SettingsPage() {
                       <input
                         value={editingCat.name}
                         onChange={e => setEditingCat({ ...editingCat, name: e.target.value })}
-                        className="flex-1 px-3 py-1.5 border border-black/10 dark:border-white/10 rounded-lg text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                        className="flex-1 px-3 py-1.5 border border-black/10 dark:border-white/10 rounded-lg text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
                       />
                       <button onClick={() => saveCategory(editingCat)} className="text-xs font-bold text-emerald-500 px-2 py-1 bg-emerald-500/10 rounded-md">Save</button>
                       <button onClick={() => setEditingCat(null)} className="text-xs font-bold text-slate-500 px-2 py-1 bg-slate-500/10 rounded-md">Cancel</button>
@@ -183,7 +183,7 @@ export function SettingsPage() {
                     <>
                       <div className="w-4 h-4 rounded-full shadow-inner" style={{ backgroundColor: cat.color }} />
                       <span className="flex-1 text-[15px] font-medium text-slate-800 dark:text-white">{cat.name}</span>
-                      <button onClick={() => setEditingCat(cat)} className="text-xs font-semibold text-indigo-500 hover:text-indigo-600 transition-colors">Edit</button>
+                      <button onClick={() => setEditingCat(cat)} className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">Edit</button>
                       {!cat.isDefault && (
                         <button onClick={() => deleteCategory(cat.id)} className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors ml-1">Delete</button>
                       )}
@@ -203,7 +203,7 @@ export function SettingsPage() {
                 placeholder="Category name"
                 value={newCatName}
                 onChange={e => setNewCatName(e.target.value)}
-                className="flex-1 px-4 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                className="flex-1 px-4 py-2.5 border border-black/10 dark:border-white/10 rounded-xl text-sm bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
               <GlassButton onClick={addCategory} variant="secondary">Add</GlassButton>
             </div>

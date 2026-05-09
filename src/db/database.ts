@@ -16,6 +16,7 @@ import type {
   RecurringException,
   CsvImportTemplate,
 } from './model';
+import { COLORS } from '../utils/theme';
 
 export class SpenTrackDB extends Dexie {
   settings!: Table<AppSettings>;
@@ -55,7 +56,7 @@ export async function seedDefaultData() {
   });
 
   const categories: Category[] = [
-    { id: 'cat-housing', name: 'Housing', color: '#6366f1', isDefault: true },
+    { id: 'cat-housing', name: 'Housing', color: COLORS.primary, isDefault: true },
     { id: 'cat-food', name: 'Food & Dining', color: '#f59e0b', isDefault: true },
     { id: 'cat-transport', name: 'Transport', color: '#10b981', isDefault: true },
     { id: 'cat-health', name: 'Health', color: '#ef4444', isDefault: true },

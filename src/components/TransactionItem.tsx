@@ -33,7 +33,7 @@ export function TransactionItem({ transaction, category, currencies, activeCurre
         <div className="text-[15px] font-semibold text-slate-800 dark:text-white truncate flex items-center gap-1.5">
           {category?.name ?? 'Unknown'}
           {'isRecurring' in transaction && transaction.isRecurring && (
-            <Repeat className="w-3.5 h-3.5 text-indigo-500" />
+            <Repeat className="w-3.5 h-3.5 text-primary" />
           )}
         </div>
         {transaction.note && (

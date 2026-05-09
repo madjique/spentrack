@@ -79,7 +79,7 @@ export function ListView() {
         >
           {sortedDates.map(date => (
             <motion.div variants={itemVariants} key={date}>
-              <GlassCard className="p-0 overflow-hidden border border-white/60 dark:border-white/10 shadow-lg shadow-indigo-900/5 dark:shadow-black/20">
+              <GlassCard className="p-0 overflow-hidden border border-white/60 dark:border-white/10 shadow-lg shadow-primary/5 dark:shadow-black/20">
                 <div className="px-5 py-3 bg-white/50 dark:bg-white/5 backdrop-blur-md border-b border-black/5 dark:border-white/5 sticky top-0 z-10">
                   <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                     {format(parseISO(date), 'EEEE, MMMM d')}
