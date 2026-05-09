@@ -102,7 +102,7 @@ export function useSpending({
           baseAmount: amount,
           currencyCode,
           categoryId,
-          startDate: editVirtual.originalDate,
+          startDate: date,
           endDate: endDate || rule.endDate,
           note: note || undefined,
         });
@@ -115,6 +115,7 @@ export function useSpending({
           baseAmount: amount,
           currencyCode,
           categoryId,
+          startDate: date,
           note: note || undefined,
         });
       }
