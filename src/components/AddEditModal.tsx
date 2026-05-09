@@ -108,7 +108,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
         initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="w-full sm:max-w-md bg-white/70 dark:bg-black/50 backdrop-blur-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 shadow-2xl border border-white/50 dark:border-white/10 max-h-[90vh] overflow-y-auto relative z-10"
+        className="w-full sm:max-w-md bg-white/70 dark:bg-black/50 backdrop-blur-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 shadow-2xl border border-white/50 dark:border-white/10 max-h-[90vh] overflow-y-auto overflow-x-hidden relative z-10"
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
