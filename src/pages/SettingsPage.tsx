@@ -1,97 +1,40 @@
-import { useState } from 'react';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/database';
-import { useAppStore } from '../store/useAppStore';
-import { exportAllTransactionsCSV, importTransactionsCSV } from '../lib/csvUtils';
-import type { Currency, Category } from '../db/database';
+import { useSettings } from '../hooks/useSettings';
+import { useCurrency } from '../hooks/useCurrency';
+import { exportAllTransactionsCSV, importTransactionsCSV } from '../utils/csv.utils';
+import type { Category } from '../db/model';
 
 export function SettingsPage() {
-  const { theme, setTheme, setActiveCurrencyCode, periodType, setPeriodType } = useAppStore();
+  const {
+    theme,
+    periodType,
+    setPeriodType,
+    data,
+    newCatName, setNewCatName,
+    newCatColor, setNewCatColor,
+    editingCat, setEditingCat,
+    importStatus, setImportStatus,
+    exporting, setExporting,
+    addCategory, saveCategory, deleteCategory, updateTheme,
+  } = useSettings();
 
-  const [newCatName, setNewCatName] = useState('');
-  const [newCatColor, setNewCatColor] = useState('#6366f1');
-  const [editingCat, setEditingCat] = useState<Category | null>(null);
+  const settings = data?.settings;
+  const currencies = settings?.currencies ?? [];
+  const categories = data?.categories ?? [];
 
-  const [newCurrCode, setNewCurrCode] = useState('');
-  const [newCurrSymbol, setNewCurrSymbol] = useState('');
-  const [newCurrRate, setNewCurrRate] = useState('');
-
-  const [importStatus, setImportStatus] = useState<string | null>(null);
-  const [exporting, setExporting] = useState(false);
-
-  const data = useLiveQuery(async () => {
-    const [settings, categories] = await Promise.all([
-      db.settings.get('global'),
-      db.categories.toArray(),
-    ]);
-    return { settings, categories };
-  });
+  const {
+    newCurrCode, setNewCurrCode,
+    newCurrSymbol, setNewCurrSymbol,
+    newCurrRate, setNewCurrRate,
+    addCurrency, deleteCurrency, setDefaultCurrency,
+  } = useCurrency(settings, currencies);
 
   if (!data) return <div className="p-4">Loading...</div>;
-
-  const { settings, categories } = data;
-  const currencies = settings?.currencies ?? [];
-
-  async function updateCurrencies(newList: Currency[]) {
-    if (!settings) return;
-    await db.settings.put({ ...settings, currencies: newList });
-  }
-
-  async function addCurrency() {
-    if (!newCurrCode || !newCurrSymbol || !newCurrRate) return;
-    const rate = parseFloat(newCurrRate);
-    if (isNaN(rate)) return;
-    const newList = [...currencies, {
-      code: newCurrCode.toUpperCase(),
-      symbol: newCurrSymbol,
-      exchangeRateToUSD: rate,
-      isDefault: currencies.length === 0,
-    }];
-    await updateCurrencies(newList);
-    setNewCurrCode(''); setNewCurrSymbol(''); setNewCurrRate('');
-  }
-
-  async function deleteCurrency(code: string) {
-    await updateCurrencies(currencies.filter(c => c.code !== code));
-  }
-
-  async function setDefaultCurrency(code: string) {
-    const newList = currencies.map(c => ({ ...c, isDefault: c.code === code }));
-    await updateCurrencies(newList);
-    setActiveCurrencyCode(code);
-  }
-
-  async function addCategory() {
-    if (!newCatName) return;
-    await db.categories.put({
-      id: crypto.randomUUID(),
-      name: newCatName,
-      color: newCatColor,
-      isDefault: false,
-    });
-    setNewCatName(''); setNewCatColor('#6366f1');
-  }
-
-  async function saveCategory(cat: Category) {
-    await db.categories.put(cat);
-    setEditingCat(null);
-  }
-
-  async function deleteCategory(id: string) {
-    await db.categories.delete(id);
-  }
-
-  async function updateTheme(t: 'light' | 'dark' | 'system') {
-    setTheme(t);
-    if (!settings) return;
-    await db.settings.put({ ...settings, theme: t });
-  }
 
   async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setImportStatus('Importing...');
-    const catMap = new Map(categories.map(c => [c.id, c.name]));
+    const catMap = new Map(categories.map((c: Category) => [c.id, c.name]));
     const result = await importTransactionsCSV(file, catMap);
     setImportStatus(`Imported ${result.imported} transactions.${result.errors.length > 0 ? ` Errors: ${result.errors.join(', ')}` : ''}`);
     e.target.value = '';

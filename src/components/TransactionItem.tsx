@@ -1,7 +1,8 @@
 import { format, parseISO } from 'date-fns';
-import type { Category, Currency } from '../db/database';
-import type { VirtualTransaction } from '../lib/recurring';
-import type { Transaction } from '../db/database';
+import type { Category, Currency } from '../db/model';
+import type { VirtualTransaction } from '../utils/transaction.utils';
+import type { Transaction } from '../db/model';
+import { convertAmount } from '../utils/currency.utils';
 
 type AnyTransaction = (Transaction & { isRecurring?: false }) | VirtualTransaction;
 
@@ -11,13 +12,6 @@ interface TransactionItemProps {
   currencies: Currency[];
   activeCurrencyCode: string;
   onClick: () => void;
-}
-
-function convertAmount(amount: number, fromCode: string, toCode: string, currencies: Currency[]): number {
-  const from = currencies.find(c => c.code === fromCode);
-  const to = currencies.find(c => c.code === toCode);
-  if (!from || !to) return amount;
-  return amount * (from.exchangeRateToUSD / to.exchangeRateToUSD);
 }
 
 export function TransactionItem({ transaction, category, currencies, activeCurrencyCode, onClick }: TransactionItemProps) {

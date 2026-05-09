@@ -1,22 +1,5 @@
-import { format, parseISO } from 'date-fns';
 import { useAppStore } from '../store/useAppStore';
-
-function formatPeriodLabel(anchorDate: string, periodType: 'week' | 'month' | 'year'): string {
-  const d = parseISO(anchorDate);
-  if (periodType === 'month') return format(d, 'MMMM yyyy');
-  if (periodType === 'year') return format(d, 'yyyy');
-  // week
-  const { startOfWeek, endOfWeek } = (() => {
-    const start = new Date(d);
-    const day = start.getDay();
-    const diff = (day === 0 ? -6 : 1 - day);
-    start.setDate(start.getDate() + diff);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 6);
-    return { startOfWeek: start, endOfWeek: end };
-  })();
-  return `${format(startOfWeek, 'MMM d')} – ${format(endOfWeek, 'MMM d, yyyy')}`;
-}
+import { formatPeriodLabel } from '../utils/date.utils';
 
 export function PeriodHeader() {
   const { currentPeriodDate, periodType, setPeriodType, goToPrevPeriod, goToNextPeriod } = useAppStore();

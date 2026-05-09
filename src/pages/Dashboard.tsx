@@ -1,70 +1,28 @@
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/database';
-import { useAppStore } from '../store/useAppStore';
-import { getPeriodBounds } from '../lib/periodUtils';
-import { generateRecurringInstances } from '../lib/recurring';
+import { useTransactions } from '../hooks/useTransactions';
+import { convertAmount } from '../utils/currency.utils';
 import { PeriodHeader } from '../components/PeriodHeader';
 import { DonutChart } from '../components/DonutChart';
 import { useState } from 'react';
 import { AddEditModal } from '../components/AddEditModal';
-import { isWithinInterval, parseISO } from 'date-fns';
-import type { Transaction } from '../db/database';
-import type { VirtualTransaction } from '../lib/recurring';
-
-function convertAmount(amount: number, fromCode: string, toCode: string, currencies: Array<{ code: string; exchangeRateToUSD: number }>): number {
-  const from = currencies.find(c => c.code === fromCode);
-  const to = currencies.find(c => c.code === toCode);
-  if (!from || !to) return amount;
-  return amount * (from.exchangeRateToUSD / to.exchangeRateToUSD);
-}
+import type { Transaction } from '../db/model';
+import type { VirtualTransaction } from '../utils/transaction.utils';
 
 export function Dashboard() {
-  const { currentPeriodDate, periodType, activeCurrencyCode } = useAppStore();
-  const { start, end } = getPeriodBounds(currentPeriodDate, periodType);
+  const { isLoading, allTx, currencies, categories, categoryMap, activeCurrencyCode } = useTransactions();
 
   const [editTx, setEditTx] = useState<Transaction | undefined>();
   const [editVirtual, setEditVirtual] = useState<VirtualTransaction | undefined>();
   const [showModal, setShowModal] = useState(false);
 
-  const data = useLiveQuery(async () => {
-    const [settings, categories, transactions, rules, exceptions] = await Promise.all([
-      db.settings.get('global'),
-      db.categories.toArray(),
-      db.transactions.toArray(),
-      db.recurringRules.toArray(),
-      db.recurringExceptions.toArray(),
-    ]);
-    return { settings, categories, transactions, rules, exceptions };
-  }, []);
+  if (isLoading) return <div className="p-4 text-gray-500 dark:text-gray-400">Loading...</div>;
 
-  if (!data) return <div className="p-4 text-gray-500 dark:text-gray-400">Loading...</div>;
-
-  const { settings, categories, transactions, rules, exceptions } = data;
-  const currencies = settings?.currencies ?? [];
   const activeCurrency = currencies.find(c => c.code === activeCurrencyCode) ?? currencies[0];
-
-  const periodTransactions = transactions.filter(tx => {
-    try {
-      return isWithinInterval(parseISO(tx.date), { start, end });
-    } catch { return false; }
-  });
-
-  const virtualInstances: VirtualTransaction[] = [];
-  for (const rule of rules) {
-    const instances = generateRecurringInstances(rule, start, end, exceptions);
-    virtualInstances.push(...instances.filter(i => !i.isDeleted));
-  }
-
-  type AnyTx = (Transaction & { isRecurring?: false }) | VirtualTransaction;
-  const allTx: AnyTx[] = [...periodTransactions, ...virtualInstances];
 
   const expenseTx = allTx.filter(tx => tx.type === 'EXPENSE');
   const incomeTx = allTx.filter(tx => tx.type === 'INCOME');
 
   const totalExpense = expenseTx.reduce((sum, tx) => sum + convertAmount(tx.amount, tx.currencyCode, activeCurrencyCode, currencies), 0);
   const totalIncome = incomeTx.reduce((sum, tx) => sum + convertAmount(tx.amount, tx.currencyCode, activeCurrencyCode, currencies), 0);
-
-  const categoryMap = new Map(categories.map(c => [c.id, c]));
 
   const byCategory: Record<string, number> = {};
   for (const tx of expenseTx) {

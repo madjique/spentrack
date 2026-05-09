@@ -1,6 +1,6 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAppStore } from '../store/useAppStore';
+import { useTheme } from '../hooks/useTheme';
 
 const navItems = [
   {
@@ -47,20 +47,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const theme = useAppStore(s => s.theme);
-
-  useEffect(() => {
-    const html = document.documentElement;
-    if (theme === 'dark') {
-      html.classList.add('dark');
-    } else if (theme === 'light') {
-      html.classList.remove('dark');
-    } else {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) html.classList.add('dark');
-      else html.classList.remove('dark');
-    }
-  }, [theme]);
+  useTheme();
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950">

@@ -1,5 +1,5 @@
 import { addWeeks, addMonths, addYears, isAfter, isBefore, parseISO, format, setDate } from 'date-fns';
-import type { RecurringRule, RecurringException } from '../db/database';
+import type { RecurringRule, RecurringException } from '../db/model';
 
 export interface VirtualTransaction {
   id: string;
@@ -20,10 +20,12 @@ export function generateRecurringInstances(
   rule: RecurringRule,
   periodStart: Date,
   periodEnd: Date,
-  exceptions: RecurringException[]
+  exceptions: RecurringException[],
 ): VirtualTransaction[] {
   const results: VirtualTransaction[] = [];
-  const exceptionMap = new Map(exceptions.filter(e => e.ruleId === rule.id).map(e => [e.originalDate, e]));
+  const exceptionMap = new Map(
+    exceptions.filter(e => e.ruleId === rule.id).map(e => [e.originalDate, e]),
+  );
 
   const ruleStart = parseISO(rule.startDate);
   const ruleEnd = rule.endDate ? parseISO(rule.endDate) : null;
@@ -33,7 +35,9 @@ export function generateRecurringInstances(
     let current = ruleStart;
 
     const effectiveEnd = ruleEnd
-      ? isBefore(ruleEnd, periodEnd) ? ruleEnd : periodEnd
+      ? isBefore(ruleEnd, periodEnd)
+        ? ruleEnd
+        : periodEnd
       : periodEnd;
 
     while (!isAfter(current, effectiveEnd)) {
@@ -69,9 +73,7 @@ export function generateRecurringInstances(
     return dates;
   };
 
-  const dates = generateDates();
-
-  for (const originalDate of dates) {
+  for (const originalDate of generateDates()) {
     const exception = exceptionMap.get(originalDate);
     const displayDate = exception?.newDate ?? originalDate;
     const amount = exception?.newAmount ?? rule.baseAmount;

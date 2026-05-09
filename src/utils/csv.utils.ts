@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
 import { db } from '../db/database';
-import { generateRecurringInstances } from './recurring';
+import { generateRecurringInstances } from './transaction.utils';
 import { format } from 'date-fns';
 
 export async function exportAllTransactionsCSV(): Promise<void> {
@@ -12,7 +12,6 @@ export async function exportAllTransactionsCSV(): Promise<void> {
   ]);
 
   const categoryMap = new Map(categories.map(c => [c.id, c.name]));
-
   const rows: Record<string, string>[] = [];
 
   for (const tx of transactions) {
@@ -60,15 +59,20 @@ export async function exportAllTransactionsCSV(): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
-export async function importTransactionsCSV(file: File, categoryIdToName: Map<string, string>): Promise<{ imported: number; errors: string[] }> {
-  return new Promise((resolve) => {
+export async function importTransactionsCSV(
+  file: File,
+  categoryIdToName: Map<string, string>,
+): Promise<{ imported: number; errors: string[] }> {
+  return new Promise(resolve => {
     Papa.parse<Record<string, string>>(file, {
       header: true,
       skipEmptyLines: true,
-      complete: async (results) => {
+      complete: async results => {
         const errors: string[] = [];
         let imported = 0;
-        const reverseCategoryMap = new Map(Array.from(categoryIdToName.entries()).map(([id, name]) => [name.toLowerCase(), id]));
+        const reverseCategoryMap = new Map(
+          Array.from(categoryIdToName.entries()).map(([id, name]) => [name.toLowerCase(), id]),
+        );
 
         for (const row of results.data) {
           try {
@@ -79,7 +83,9 @@ export async function importTransactionsCSV(file: File, categoryIdToName: Map<st
 
             const categoryName = row.category?.toLowerCase() ?? '';
             const categoryId = reverseCategoryMap.get(categoryName) ?? 'cat-other';
-            const type = (row.type?.toUpperCase() === 'INCOME' ? 'INCOME' : 'EXPENSE') as 'EXPENSE' | 'INCOME';
+            const type = (
+              row.type?.toUpperCase() === 'INCOME' ? 'INCOME' : 'EXPENSE'
+            ) as 'EXPENSE' | 'INCOME';
 
             await db.transactions.put({
               id: row.id || crypto.randomUUID(),
@@ -97,7 +103,7 @@ export async function importTransactionsCSV(file: File, categoryIdToName: Map<st
         }
         resolve({ imported, errors });
       },
-      error: (err) => {
+      error: err => {
         resolve({ imported: 0, errors: [err.message] });
       },
     });

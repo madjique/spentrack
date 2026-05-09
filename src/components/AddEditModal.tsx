@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { format } from 'date-fns';
-import { db } from '../db/database';
-import type { Transaction, RecurringRule, Category, Currency } from '../db/database';
-import type { VirtualTransaction } from '../lib/recurring';
+import type { RecurringRule, Category, Currency } from '../db/model';
+import type { Transaction } from '../db/model';
+import type { VirtualTransaction } from '../utils/transaction.utils';
+import { useSpending } from '../hooks/useSpending';
 
 interface AddEditModalProps {
   onClose: () => void;
@@ -14,150 +15,70 @@ interface AddEditModalProps {
 }
 
 type TransactionMode = 'one-time' | 'recurring';
-type RecurringEditScope = 'this' | 'forward' | 'all';
+
+type FormValues = {
+  mode: TransactionMode;
+  type: 'EXPENSE' | 'INCOME';
+  amount: string;
+  currencyCode: string;
+  date: string;
+  categoryId: string;
+  note: string;
+  frequency: RecurringRule['frequency'];
+  startDate: string;
+  endDate: string;
+};
 
 export function AddEditModal({ onClose, editTransaction, editRecurring, editVirtual, categories, currencies }: AddEditModalProps) {
   const isEditing = !!(editTransaction || editRecurring || editVirtual);
   const defaultCurrency = currencies.find(c => c.isDefault) ?? currencies[0];
 
-  const [mode, setMode] = useState<TransactionMode>(
-    editRecurring || editVirtual ? 'recurring' : 'one-time'
-  );
-  const [type, setType] = useState<'EXPENSE' | 'INCOME'>(
-    editTransaction?.type ?? editRecurring?.type ?? editVirtual?.type ?? 'EXPENSE'
-  );
-  const [amount, setAmount] = useState(
-    (editTransaction?.amount ?? editRecurring?.baseAmount ?? editVirtual?.amount ?? '').toString()
-  );
-  const [currencyCode, setCurrencyCode] = useState(
-    editTransaction?.currencyCode ?? editRecurring?.currencyCode ?? editVirtual?.currencyCode ?? defaultCurrency?.code ?? 'EUR'
-  );
-  const [date, setDate] = useState(
-    editTransaction?.date ?? editVirtual?.displayDate ?? format(new Date(), 'yyyy-MM-dd')
-  );
-  const [categoryId, setCategoryId] = useState(
-    editTransaction?.categoryId ?? editRecurring?.categoryId ?? editVirtual?.categoryId ?? categories[0]?.id ?? ''
-  );
-  const [note, setNote] = useState(
-    editTransaction?.note ?? editRecurring?.note ?? editVirtual?.note ?? ''
-  );
-  const [frequency, setFrequency] = useState<RecurringRule['frequency']>(
-    editRecurring?.frequency ?? 'MONTHLY'
-  );
-  const [startDate, setStartDate] = useState(
-    editRecurring?.startDate ?? format(new Date(), 'yyyy-MM-dd')
-  );
-  const [endDate, setEndDate] = useState(editRecurring?.endDate ?? '');
-  const [recurringScope, setRecurringScope] = useState<RecurringEditScope>('this');
-  const [showScopeDialog, setShowScopeDialog] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const { register, handleSubmit, control, setValue } = useForm<FormValues>({
+    defaultValues: {
+      mode: editRecurring || editVirtual ? 'recurring' : 'one-time',
+      type: editTransaction?.type ?? editRecurring?.type ?? editVirtual?.type ?? 'EXPENSE',
+      amount: (editTransaction?.amount ?? editRecurring?.baseAmount ?? editVirtual?.amount ?? '').toString(),
+      currencyCode: editTransaction?.currencyCode ?? editRecurring?.currencyCode ?? editVirtual?.currencyCode ?? defaultCurrency?.code ?? 'EUR',
+      date: editTransaction?.date ?? editVirtual?.displayDate ?? format(new Date(), 'yyyy-MM-dd'),
+      categoryId: editTransaction?.categoryId ?? editRecurring?.categoryId ?? editVirtual?.categoryId ?? categories[0]?.id ?? '',
+      note: editTransaction?.note ?? editRecurring?.note ?? editVirtual?.note ?? '',
+      frequency: editRecurring?.frequency ?? 'MONTHLY',
+      startDate: editRecurring?.startDate ?? format(new Date(), 'yyyy-MM-dd'),
+      endDate: editRecurring?.endDate ?? '',
+    },
+  });
 
-  async function handleSave() {
-    const parsedAmount = parseFloat(amount);
+  const mode = useWatch({ control, name: 'mode' });
+  const type = useWatch({ control, name: 'type' });
+
+  const {
+    deleteConfirm,
+    showScopeDialog,
+    setShowScopeDialog,
+    recurringScope,
+    setRecurringScope,
+    saveOneTime,
+    saveRecurringRule,
+    saveRecurringEdit,
+    handleDelete,
+  } = useSpending({ onClose, editTransaction, editRecurring, editVirtual });
+
+  const onSubmit = async (values: FormValues) => {
+    const parsedAmount = parseFloat(values.amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) return;
 
-    if (mode === 'one-time') {
-      const tx: Transaction = {
-        id: editTransaction?.id ?? crypto.randomUUID(),
-        amount: parsedAmount,
-        currencyCode,
-        date,
-        categoryId,
-        note: note || undefined,
-        type,
-      };
-      await db.transactions.put(tx);
-    } else {
-      if (editVirtual) {
-        if (!showScopeDialog) {
-          setShowScopeDialog(true);
-          return;
-        }
-        await saveRecurringEdit(parsedAmount);
-      } else {
-        const rule: RecurringRule = {
-          id: editRecurring?.id ?? crypto.randomUUID(),
-          baseAmount: parsedAmount,
-          currencyCode,
-          categoryId,
-          frequency,
-          startDate,
-          endDate: endDate || undefined,
-          note: note || undefined,
-          type,
-        };
-        await db.recurringRules.put(rule);
-      }
-    }
-    onClose();
-  }
-
-  async function saveRecurringEdit(parsedAmount: number) {
-    if (!editVirtual) return;
-
-    if (recurringScope === 'this') {
-      await db.recurringExceptions.put({
-        id: crypto.randomUUID(),
-        ruleId: editVirtual.ruleId,
-        originalDate: editVirtual.originalDate,
-        isDeleted: false,
-        newAmount: parsedAmount !== editVirtual.amount ? parsedAmount : undefined,
-        newDate: date !== editVirtual.originalDate ? date : undefined,
-      });
-    } else if (recurringScope === 'forward') {
-      const rule = await db.recurringRules.get(editVirtual.ruleId);
-      if (rule) {
-        const prevDay = new Date(editVirtual.originalDate);
-        prevDay.setDate(prevDay.getDate() - 1);
-        await db.recurringRules.update(editVirtual.ruleId, {
-          endDate: format(prevDay, 'yyyy-MM-dd'),
-        });
-        await db.recurringRules.put({
-          ...rule,
-          id: crypto.randomUUID(),
-          baseAmount: parsedAmount,
-          currencyCode,
-          categoryId,
-          startDate: editVirtual.originalDate,
-          endDate: endDate || rule.endDate,
-          note: note || undefined,
-        });
-      }
-    } else {
-      const rule = await db.recurringRules.get(editVirtual.ruleId);
-      if (rule) {
-        await db.recurringRules.put({
-          ...rule,
-          baseAmount: parsedAmount,
-          currencyCode,
-          categoryId,
-          note: note || undefined,
-        });
-      }
-    }
-    onClose();
-  }
-
-  async function handleDelete() {
-    if (editTransaction) {
-      await db.transactions.delete(editTransaction.id);
-      onClose();
+    if (values.mode === 'one-time') {
+      await saveOneTime(parsedAmount, values.currencyCode, values.date, values.categoryId, values.note, values.type);
     } else if (editVirtual) {
-      if (!deleteConfirm) { setDeleteConfirm(true); return; }
-      await db.recurringExceptions.put({
-        id: crypto.randomUUID(),
-        ruleId: editVirtual.ruleId,
-        originalDate: editVirtual.originalDate,
-        isDeleted: true,
-      });
-      onClose();
-    } else if (editRecurring) {
-      if (!deleteConfirm) { setDeleteConfirm(true); return; }
-      await db.recurringRules.delete(editRecurring.id);
-      await db.recurringExceptions.where('ruleId').equals(editRecurring.id).delete();
-      onClose();
+      if (!showScopeDialog) {
+        setShowScopeDialog(true);
+        return;
+      }
+      await saveRecurringEdit(parsedAmount, values.currencyCode, values.categoryId, values.date, values.endDate, values.note);
+    } else {
+      await saveRecurringRule(parsedAmount, values.currencyCode, values.categoryId, values.frequency, values.startDate, values.endDate, values.note, values.type);
     }
-  }
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50">
@@ -178,7 +99,8 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
             {(['one-time', 'recurring'] as const).map(m => (
               <button
                 key={m}
-                onClick={() => setMode(m)}
+                type="button"
+                onClick={() => setValue('mode', m)}
                 className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
                   mode === m ? 'bg-white dark:bg-gray-700 shadow text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'
                 }`}
@@ -193,7 +115,8 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
           {(['EXPENSE', 'INCOME'] as const).map(t => (
             <button
               key={t}
-              onClick={() => setType(t)}
+              type="button"
+              onClick={() => setValue('type', t)}
               className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${
                 type === t
                   ? t === 'EXPENSE' ? 'bg-red-500 text-white shadow' : 'bg-green-500 text-white shadow'
@@ -224,7 +147,8 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
               </label>
             ))}
             <button
-              onClick={() => saveRecurringEdit(parseFloat(amount))}
+              type="button"
+              onClick={handleSubmit(onSubmit)}
               className="mt-2 w-full bg-indigo-500 text-white py-2 rounded-lg text-sm font-medium"
             >
               Confirm
@@ -232,7 +156,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
           </div>
         )}
 
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="flex gap-2">
             <div className="flex-1">
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Amount</label>
@@ -240,17 +164,15 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
                 type="number"
                 min="0"
                 step="0.01"
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
                 placeholder="0.00"
+                {...register('amount')}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
             <div className="w-24">
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Currency</label>
               <select
-                value={currencyCode}
-                onChange={e => setCurrencyCode(e.target.value)}
+                {...register('currencyCode')}
                 className="w-full px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               >
                 {currencies.map(c => (
@@ -265,8 +187,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
               <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Date</label>
               <input
                 type="date"
-                value={date}
-                onChange={e => setDate(e.target.value)}
+                {...register('date')}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -277,8 +198,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
               <div>
                 <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Frequency</label>
                 <select
-                  value={frequency}
-                  onChange={e => setFrequency(e.target.value as RecurringRule['frequency'])}
+                  {...register('frequency')}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="WEEKLY">Weekly</option>
@@ -293,8 +213,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Start Date</label>
                   <input
                     type="date"
-                    value={startDate}
-                    onChange={e => setStartDate(e.target.value)}
+                    {...register('startDate')}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -302,8 +221,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
                   <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">End Date (optional)</label>
                   <input
                     type="date"
-                    value={endDate}
-                    onChange={e => setEndDate(e.target.value)}
+                    {...register('endDate')}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
@@ -314,8 +232,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Category</label>
             <select
-              value={categoryId}
-              onChange={e => setCategoryId(e.target.value)}
+              {...register('categoryId')}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               {categories.map(c => (
@@ -327,10 +244,9 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
           <div>
             <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Note (optional)</label>
             <textarea
-              value={note}
-              onChange={e => setNote(e.target.value)}
               rows={2}
               placeholder="Add a note..."
+              {...register('note')}
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
             />
           </div>
@@ -338,6 +254,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
           <div className="flex gap-2 pt-2">
             {isEditing && !showScopeDialog && (
               <button
+                type="button"
                 onClick={handleDelete}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   deleteConfirm ? 'bg-red-500 text-white' : 'border border-red-300 text-red-500 dark:border-red-700'
@@ -348,15 +265,16 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
             )}
             {!showScopeDialog && (
               <button
-                onClick={handleSave}
+                type="submit"
                 className="flex-1 bg-indigo-500 hover:bg-indigo-600 text-white py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 {isEditing ? 'Save Changes' : 'Add Transaction'}
               </button>
             )}
           </div>
-        </div>
+        </form>
       </div>
     </div>
   );
 }
+
