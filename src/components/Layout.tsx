@@ -3,7 +3,8 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, ArrowRightLeft, Plus, Settings } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { cn } from '../utils/cn';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAppStore } from '../store/useAppStore';
 import { COLORS, hexToRgba } from '../utils/theme';
 
 const navItems = [
@@ -23,7 +24,9 @@ export function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
 
   const isAddRoute = location.pathname === '/add';
-  const showFab = location.pathname === '/' || location.pathname === '/list';
+  const { isModalOpen } = useAppStore();
+  const showFab = (location.pathname === '/' || location.pathname === '/list') && !isModalOpen;
+  const showMobileNav = !isAddRoute && !isModalOpen;
   const bottomNavItems = navItems.filter(item => item.to !== '/add');
 
   return (
@@ -62,14 +65,17 @@ export function Layout({ children }: LayoutProps) {
       </div>
 
       {/* Mobile Floating Bottom Nav (Glass Pill) */}
-      {!isAddRoute && (
-        <div className="md:hidden fixed bottom-6 left-4 right-4 z-40">
-          <motion.nav
+      <AnimatePresence mode="wait">
+        {showMobileNav && (
+          <motion.div 
+            key="mobile-nav"
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-[2.5rem] flex p-2 shadow-xl shadow-primary/5 dark:shadow-black/40"
+            className="md:hidden fixed bottom-6 left-4 right-4 z-40"
           >
+            <nav className="bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-[2.5rem] flex p-2 shadow-xl shadow-primary/5 dark:shadow-black/40">
             {bottomNavItems.map(item => (
               <NavLink
                 key={item.to}
@@ -88,25 +94,33 @@ export function Layout({ children }: LayoutProps) {
                 <span className="text-[10px] font-medium tracking-wide">{item.label}</span>
               </NavLink>
             ))}
-          </motion.nav>
-        </div>
-      )}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Action Button (Mobile) */}
-      {showFab && (
-        <div className="md:hidden fixed bottom-[104px] right-6 z-40">
-          <motion.button
+      <AnimatePresence>
+        {showFab && (
+          <motion.div 
+            key="fab"
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate('/add')}
-            className={`w-14 h-14 bg-primary hover:bg-primary/90 text-white dark:text-slate-900 rounded-full flex items-center justify-center shadow-[0_8px_30px_${hexToRgba(COLORS.primary, 0.3)}] backdrop-blur-md border border-white/20 transition-all duration-300`}
+            exit={{ scale: 0, opacity: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="md:hidden fixed bottom-[104px] right-6 z-40"
           >
-            <Plus className="w-6 h-6" />
-          </motion.button>
-        </div>
-      )}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/add')}
+              className={`w-14 h-14 bg-primary hover:bg-primary/90 text-white dark:text-slate-900 rounded-full flex items-center justify-center shadow-[0_8px_30px_${hexToRgba(COLORS.primary, 0.3)}] backdrop-blur-md border border-white/20 transition-all duration-300`}
+            >
+              <Plus className="w-6 h-6" />
+            </motion.button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

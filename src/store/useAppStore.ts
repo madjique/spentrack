@@ -13,6 +13,8 @@ interface AppStore {
   setCurrentPeriodDate: (date: string) => void;
   goToPrevPeriod: () => void;
   goToNextPeriod: () => void;
+  isModalOpen: boolean;
+  setIsModalOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppStore>()(
@@ -42,6 +44,8 @@ export const useAppStore = create<AppStore>()(
         else d.setFullYear(d.getFullYear() + 1);
         set({ currentPeriodDate: format(d, 'yyyy-MM-dd') });
       },
+      isModalOpen: false,
+      setIsModalOpen: (open) => set({ isModalOpen: open }),
     }),
     { name: 'spentrack-ui' }
   )

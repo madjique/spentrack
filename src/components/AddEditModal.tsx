@@ -1,5 +1,6 @@
 import { useForm, useWatch } from 'react-hook-form';
 import { format } from 'date-fns';
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import type { RecurringRule, Category, Currency } from '../db/model';
@@ -7,6 +8,7 @@ import type { Transaction } from '../db/model';
 import type { VirtualTransaction } from '../utils/transaction.utils';
 import { useSpending } from '../hooks/useSpending';
 import { GlassButton } from './ui/GlassButton';
+import { useAppStore } from '../store/useAppStore';
 
 interface AddEditModalProps {
   onClose: () => void;
@@ -33,8 +35,14 @@ type FormValues = {
 };
 
 export function AddEditModal({ onClose, editTransaction, editRecurring, editVirtual, categories, currencies }: AddEditModalProps) {
+  const { setIsModalOpen } = useAppStore();
   const isEditing = !!(editTransaction || editRecurring || editVirtual);
   const defaultCurrency = currencies.find(c => c.isDefault) ?? currencies[0];
+
+  useEffect(() => {
+    setIsModalOpen(true);
+    return () => setIsModalOpen(false);
+  }, [setIsModalOpen]);
 
   const { register, handleSubmit, control, setValue } = useForm<FormValues>({
     defaultValues: {
