@@ -6,6 +6,7 @@ import { ListView } from './pages/ListView';
 import { AddPage } from './pages/AddPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { seedDefaultData } from './db/database';
+import { ReloadPrompt } from './components/ReloadPrompt';
 
 export default function App() {
   useEffect(() => {
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Layout>
+      <ReloadPrompt />
     </BrowserRouter>
   );
 }

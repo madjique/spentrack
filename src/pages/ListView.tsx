@@ -4,7 +4,6 @@ import { useTransactions, type AnyTx } from '../hooks/useTransactions';
 import { PeriodHeader } from '../components/PeriodHeader';
 import { TransactionItem } from '../components/TransactionItem';
 import { AddEditModal } from '../components/AddEditModal';
-import { GlassCard } from '../components/ui/GlassCard';
 import { motion } from 'framer-motion';
 import type { Transaction } from '../db/model';
 import type { VirtualTransaction } from '../utils/transaction.utils';
@@ -60,7 +59,7 @@ export function ListView() {
       <PeriodHeader />
 
       {sortedDates.length === 0 ? (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           className="flex flex-col items-center justify-center py-20 text-center px-4"
@@ -71,33 +70,31 @@ export function ListView() {
           <p className="text-slate-600 dark:text-slate-300 font-medium">No transactions for this period</p>
         </motion.div>
       ) : (
-        <motion.div 
+        <motion.div
           variants={containerVariants}
           initial="hidden"
           animate="show"
           className="p-4 md:p-6 space-y-6"
         >
           {sortedDates.map(date => (
-            <motion.div variants={itemVariants} key={date}>
-              <GlassCard className="p-0 overflow-hidden border border-white/60 dark:border-white/10 shadow-lg shadow-primary/5 dark:shadow-black/20">
-                <div className="px-5 py-3 bg-white/50 dark:bg-white/5 backdrop-blur-md border-b border-black/5 dark:border-white/5 sticky top-0 z-10">
-                  <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                    {format(parseISO(date), 'EEEE, MMMM d')}
-                  </span>
-                </div>
-                <div className="divide-y divide-black/5 dark:divide-white/5">
-                  {grouped[date].map(tx => (
-                    <TransactionItem
-                      key={tx.id}
-                      transaction={tx as AnyTx & { isRecurring?: false }}
-                      category={categoryMap.get(tx.categoryId)}
-                      currencies={currencies}
-                      activeCurrencyCode={activeCurrencyCode}
-                      onClick={() => handleClick(tx)}
-                    />
-                  ))}
-                </div>
-              </GlassCard>
+            <motion.div variants={itemVariants} key={date} className="space-y-1">
+              <div className="px-2 py-2 sticky top-[calc(env(safe-area-inset-top,0px)+7.25rem)] md:top-[calc(env(safe-area-inset-top,0px)+5.5rem)] z-10">
+                <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-4">
+                  {format(parseISO(date), 'EEEE, MMMM d')}
+                </span>
+              </div>
+              <div className="space-y-1">
+                {grouped[date].map(tx => (
+                  <TransactionItem
+                    key={tx.id}
+                    transaction={tx as AnyTx & { isRecurring?: false }}
+                    category={categoryMap.get(tx.categoryId)}
+                    currencies={currencies}
+                    activeCurrencyCode={activeCurrencyCode}
+                    onClick={() => handleClick(tx)}
+                  />
+                ))}
+              </div>
             </motion.div>
           ))}
         </motion.div>

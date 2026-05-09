@@ -83,7 +83,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
     }
   };
 
-  const inputClasses = "w-full px-4 py-3 border border-black/10 dark:border-white/10 rounded-2xl bg-white/50 dark:bg-black/20 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md transition-all";
+  const inputClasses = "w-full px-4 py-3 border border-black/10 dark:border-white/10 rounded-2xl bg-white/70 dark:bg-black/20 text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 backdrop-blur-md transition-all";
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
@@ -99,7 +99,7 @@ export function AddEditModal({ onClose, editTransaction, editRecurring, editVirt
         initial={{ y: "100%", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        className="w-full sm:max-w-md bg-white/80 dark:bg-slate-900/80 backdrop-blur-3xl rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border border-white/50 dark:border-white/10 max-h-[90vh] overflow-y-auto relative z-10"
+        className="w-full sm:max-w-md bg-white/70 dark:bg-black/50 backdrop-blur-2xl rounded-t-[2.5rem] sm:rounded-[2.5rem] p-6 shadow-2xl border border-white/50 dark:border-white/10 max-h-[90vh] overflow-y-auto relative z-10"
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">

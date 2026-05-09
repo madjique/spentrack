@@ -58,11 +58,7 @@ export function SettingsPage() {
 
   return (
     <div className="min-h-full bg-transparent">
-      <div className="px-4 md:px-6 py-6 sticky top-0 z-10 bg-white/40 dark:bg-black/20 backdrop-blur-xl border-b border-white/50 dark:border-white/10 shadow-sm shadow-primary/5 dark:shadow-black/20">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Settings</h1>
-      </div>
-
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="show"
@@ -76,11 +72,10 @@ export function SettingsPage() {
                 <button
                   key={t}
                   onClick={() => updateTheme(t)}
-                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${
-                    theme === t 
-                      ? 'bg-white dark:bg-white/20 shadow-sm text-primary dark:text-white border border-white/50 dark:border-white/10' 
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${theme === t
+                      ? 'bg-white dark:bg-white/20 shadow-sm text-primary dark:text-white border border-white/50 dark:border-white/10'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
-                  }`}
+                    }`}
                 >
                   {t}
                 </button>
@@ -97,11 +92,10 @@ export function SettingsPage() {
                 <button
                   key={p}
                   onClick={() => setPeriodType(p)}
-                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${
-                    periodType === p 
-                      ? 'bg-white dark:bg-white/20 shadow-sm text-primary dark:text-white border border-white/50 dark:border-white/10' 
+                  className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all capitalize ${periodType === p
+                      ? 'bg-white dark:bg-white/20 shadow-sm text-primary dark:text-white border border-white/50 dark:border-white/10'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white border border-transparent'
-                  }`}
+                    }`}
                 >
                   {p}
                 </button>

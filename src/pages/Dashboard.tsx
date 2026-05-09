@@ -143,29 +143,27 @@ export function Dashboard() {
           </GlassCard>
         </motion.div>
 
-        <motion.div variants={itemVariants}>
-          <GlassCard className="p-0 overflow-hidden">
-            <div className="px-5 py-4 border-b border-black/5 dark:border-white/5 bg-white/40 dark:bg-white/5">
-              <h3 className="text-[13px] font-bold tracking-wider text-slate-500 dark:text-slate-400 uppercase">Recent Transactions</h3>
-            </div>
-            <div className="divide-y divide-black/5 dark:divide-white/5">
-              {allTx.slice(0, 5).map((tx: AnyTx) => (
-                <TransactionItem
-                  key={tx.id}
-                  transaction={tx as AnyTx & { isRecurring?: false }}
-                  category={categoryMap.get(tx.categoryId)}
-                  currencies={currencies}
-                  activeCurrencyCode={activeCurrencyCode}
-                  onClick={() => handleClick(tx)}
-                />
-              ))}
-              {allTx.length === 0 && (
-                <div className="p-8 text-center text-slate-500 font-medium">
-                  No transactions found
-                </div>
-              )}
-            </div>
-          </GlassCard>
+        <motion.div variants={itemVariants} className="space-y-4">
+          <div className="px-2">
+            <h3 className="text-[11px] font-black tracking-[0.2em] text-slate-400 dark:text-slate-500 uppercase ml-4">Recent Transactions</h3>
+          </div>
+          <div className="space-y-1">
+            {allTx.slice(0, 5).map((tx: AnyTx) => (
+              <TransactionItem
+                key={tx.id}
+                transaction={tx as AnyTx & { isRecurring?: false }}
+                category={categoryMap.get(tx.categoryId)}
+                currencies={currencies}
+                activeCurrencyCode={activeCurrencyCode}
+                onClick={() => handleClick(tx)}
+              />
+            ))}
+            {allTx.length === 0 && (
+              <div className="p-8 text-center text-slate-500 font-medium">
+                No transactions found
+              </div>
+            )}
+          </div>
         </motion.div>
       </motion.div>
 

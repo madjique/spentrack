@@ -55,7 +55,7 @@ export function Layout({ children }: LayoutProps) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <main className="flex-1 overflow-y-auto z-0">
-          <div className="max-w-5xl mx-auto w-full min-h-full pt-[calc(env(safe-area-inset-top,0px)+1.5rem)] md:pt-6 pb-32 md:pb-6">
+          <div className="max-w-5xl mx-auto w-full min-h-full pt-[env(safe-area-inset-top,0px)] md:pt-0 pb-32 md:pb-6">
             {children}
           </div>
         </main>
@@ -68,7 +68,7 @@ export function Layout({ children }: LayoutProps) {
             initial={{ y: 100, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-3xl flex p-2 shadow-xl shadow-primary/5 dark:shadow-black/40"
+            className="bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-white/50 dark:border-white/10 rounded-[2.5rem] flex p-2 shadow-xl shadow-primary/5 dark:shadow-black/40"
           >
             {bottomNavItems.map(item => (
               <NavLink
@@ -77,7 +77,7 @@ export function Layout({ children }: LayoutProps) {
                 end={item.to === '/'}
                 className={({ isActive }) =>
                   cn(
-                    "flex-1 flex flex-col items-center justify-center py-2 rounded-2xl transition-all duration-300",
+                    "flex-1 flex flex-col items-center justify-center py-2 rounded-[1.75rem] transition-all duration-300",
                     isActive
                       ? 'bg-white/50 dark:bg-white/10 text-primary shadow-sm'
                       : 'text-slate-500 dark:text-slate-400'

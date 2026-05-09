@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/spentrack/dev-sw.js?dev-sw', { scope: '/spentrack/', type: 'classic' })
