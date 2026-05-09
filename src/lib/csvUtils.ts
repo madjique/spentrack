@@ -60,7 +60,7 @@ export async function exportAllTransactionsCSV(): Promise<void> {
   URL.revokeObjectURL(url);
 }
 
-export async function importTransactionsCSV(file: File, categoryMap: Map<string, string>): Promise<{ imported: number; errors: string[] }> {
+export async function importTransactionsCSV(file: File, categoryIdToName: Map<string, string>): Promise<{ imported: number; errors: string[] }> {
   return new Promise((resolve) => {
     Papa.parse<Record<string, string>>(file, {
       header: true,
@@ -68,7 +68,7 @@ export async function importTransactionsCSV(file: File, categoryMap: Map<string,
       complete: async (results) => {
         const errors: string[] = [];
         let imported = 0;
-        const reverseCategoryMap = new Map(Array.from(categoryMap.entries()).map(([id, name]) => [name.toLowerCase(), id]));
+        const reverseCategoryMap = new Map(Array.from(categoryIdToName.entries()).map(([id, name]) => [name.toLowerCase(), id]));
 
         for (const row of results.data) {
           try {
