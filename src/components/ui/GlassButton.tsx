@@ -13,10 +13,10 @@ export const GlassButton = forwardRef<HTMLButtonElement, GlassButtonProps>(
   ({ className, variant = 'secondary', size = 'md', children, ...props }, ref) => {
     
     const variants = {
-      primary: `bg-primary/90 text-white dark:text-slate-900 shadow-[0_0_15px_${hexToRgba(COLORS.primary, 0.4)}] border-primary/50 hover:bg-primary dark:bg-primary/80 dark:border-primary/50 dark:hover:bg-primary`,
-      secondary: "bg-secondary/90 text-white shadow-[0_0_15px_rgba(20,200,255,0.4)] border-secondary/50 hover:bg-secondary dark:bg-secondary/80 dark:border-secondary/50 dark:hover:bg-secondary",
-      danger: "bg-red-500/80 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)] border-red-400/50 hover:bg-red-400",
-      ghost: "bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200/50 dark:hover:bg-white/10 border-transparent"
+      primary: `bg-primary/80 text-white dark:text-slate-900 backdrop-blur-xl shadow-[0_8px_25px_${hexToRgba(COLORS.primary, 0.3)}] border-white/20 hover:bg-primary dark:bg-primary/70 dark:border-white/10`,
+      secondary: "bg-white/40 dark:bg-white/10 backdrop-blur-xl text-slate-900 dark:text-white shadow-lg border-white/50 dark:border-white/10 hover:bg-white/60 dark:hover:bg-white/20",
+      danger: "bg-rose-500/80 text-white backdrop-blur-xl shadow-[0_8px_25px_rgba(244,63,94,0.3)] border-white/20 hover:bg-rose-600",
+      ghost: "bg-transparent text-slate-600 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5 border-transparent"
     };
 
     const sizes = {
