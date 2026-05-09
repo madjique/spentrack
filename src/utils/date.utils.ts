@@ -31,10 +31,7 @@ export function formatPeriodLabel(
   if (periodType === 'month') return format(d, 'MMMM yyyy');
   if (periodType === 'year') return format(d, 'yyyy');
 
-  const start = new Date(d);
-  const day = start.getDay();
-  start.setDate(start.getDate() + (day === 0 ? -6 : 1 - day));
-  const end = new Date(start);
-  end.setDate(end.getDate() + 6);
+  const start = startOfWeek(d, { weekStartsOn: 1 });
+  const end = endOfWeek(d, { weekStartsOn: 1 });
   return `${format(start, 'MMM d')} – ${format(end, 'MMM d, yyyy')}`;
 }
