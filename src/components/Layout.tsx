@@ -56,7 +56,7 @@ export function Layout({ children }: LayoutProps) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        <main className="flex-1 overflow-y-auto z-0">
+        <main className="flex-1 overflow-y-auto z-0 overscroll-x-none touch-pan-y">
           <div className="max-w-5xl mx-auto w-full min-h-full pt-[env(safe-area-inset-top,0px)] md:pt-0 pb-32 md:pb-6">
             {children}
           </div>
