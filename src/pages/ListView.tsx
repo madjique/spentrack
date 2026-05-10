@@ -25,7 +25,9 @@ export function ListView() {
     : allTx;
 
   const activeCurrency = currencies.find(c => c.code === activeCurrencyCode);
-  const totalAmount = filteredTx.reduce((sum, tx) => sum + tx.amount, 0);
+  const totalAmount = filteredTx.reduce((sum, tx) => {
+    return tx.type === 'INCOME' ? sum - tx.amount : sum + tx.amount;
+  }, 0);
   const selectedCategory = selectedCategoryId ? categoryMap.get(selectedCategoryId) : null;
 
   const sortedAllTx = [...filteredTx].sort((a, b) => {
@@ -103,12 +105,24 @@ export function ListView() {
                   All
                 </button>
                 {(() => {
+                  const catTotals = new Map<string, number>();
+                  for (const tx of allTx) {
+                    const current = catTotals.get(tx.categoryId) ?? 0;
+                    catTotals.set(tx.categoryId, tx.type === 'INCOME' ? current - tx.amount : current + tx.amount);
+                  }
+
                   const presentCategoryIds = new Set(allTx.map(tx => tx.categoryId));
                   const displayCategories = categories.length > 2
                     ? categories.filter(c => presentCategoryIds.has(c.id))
                     : categories;
 
-                  return displayCategories.map(cat => (
+                  const sortedCategories = [...displayCategories].sort((a, b) => {
+                    const totalA = Math.abs(catTotals.get(a.id) ?? 0);
+                    const totalB = Math.abs(catTotals.get(b.id) ?? 0);
+                    return totalB - totalA;
+                  });
+
+                  return sortedCategories.map(cat => (
                     <button
                       key={cat.id}
                       onClick={() => setSelectedCategoryId(cat.id)}
