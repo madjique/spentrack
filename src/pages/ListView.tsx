@@ -5,6 +5,8 @@ import { PeriodHeader } from '../components/PeriodHeader';
 import { TransactionItem } from '../components/TransactionItem';
 import { AddEditModal } from '../components/AddEditModal';
 import { motion } from 'framer-motion';
+import { GlassCard } from '../components/ui/GlassCard';
+import { cn } from '../utils/cn';
 import type { Transaction } from '../db/model';
 import type { VirtualTransaction } from '../utils/transaction.utils';
 
@@ -14,10 +16,15 @@ export function ListView() {
   const [selectedTx, setSelectedTx] = useState<Transaction | undefined>();
   const [selectedVirtual, setSelectedVirtual] = useState<VirtualTransaction | undefined>();
   const [showModal, setShowModal] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  if (isLoading) return <div className="p-6 text-slate-500 dark:text-slate-400 font-medium">Loading your finances...</div>;
+  if (isLoading || !categories) return <div className="p-6 text-slate-500 dark:text-slate-400 font-medium">Loading your finances...</div>;
 
-  const sortedAllTx = [...allTx].sort((a, b) => {
+  const filteredTx = selectedCategoryId 
+    ? allTx.filter(tx => tx.categoryId === selectedCategoryId)
+    : allTx;
+
+  const sortedAllTx = [...filteredTx].sort((a, b) => {
     const aDate = 'displayDate' in a && a.displayDate ? a.displayDate : ('date' in a ? a.date : '') ?? '';
     const bDate = 'displayDate' in b && b.displayDate ? b.displayDate : ('date' in b ? b.date : '') ?? '';
     return bDate.localeCompare(aDate);
@@ -58,7 +65,7 @@ export function ListView() {
     <div className="min-h-full bg-transparent">
       <PeriodHeader />
 
-      {sortedDates.length === 0 ? (
+      {allTx.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -76,27 +83,75 @@ export function ListView() {
           animate="show"
           className="p-4 md:p-6 space-y-6"
         >
-          {sortedDates.map(date => (
-            <motion.div variants={itemVariants} key={date} className="space-y-1">
-              <div className="px-2 py-2 sticky top-[calc(env(safe-area-inset-top,0px)+7.25rem)] md:top-[calc(env(safe-area-inset-top,0px)+5.5rem)] z-10">
-                <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-4">
-                  {format(parseISO(date), 'EEEE, MMMM d')}
-                </span>
+          {/* Category Filter */}
+          <motion.div variants={itemVariants}>
+            <GlassCard className="p-3 border-white/40 dark:border-white/5">
+              <div className="flex gap-2 overflow-x-auto no-scrollbar py-0.5">
+                <button
+                  onClick={() => setSelectedCategoryId(null)}
+                  className={cn(
+                    "px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-300 whitespace-nowrap",
+                    !selectedCategoryId
+                      ? "bg-primary text-white shadow-lg shadow-primary/25"
+                      : "bg-white/40 dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-white/50 dark:border-white/5 hover:bg-white/60 dark:hover:bg-white/10"
+                  )}
+                >
+                  All
+                </button>
+                {(() => {
+                  const presentCategoryIds = new Set(allTx.map(tx => tx.categoryId));
+                  const displayCategories = categories.length > 2
+                    ? categories.filter(c => presentCategoryIds.has(c.id))
+                    : categories;
+
+                  return displayCategories.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => setSelectedCategoryId(cat.id)}
+                      className={cn(
+                        "px-4 py-2 rounded-full text-[13px] font-bold transition-all duration-300 whitespace-nowrap flex items-center gap-2",
+                        selectedCategoryId === cat.id
+                          ? "bg-white/90 dark:bg-white/15 text-slate-900 dark:text-white shadow-md ring-2 ring-inset ring-white/50 dark:ring-white/20"
+                          : "bg-white/40 dark:bg-white/5 text-slate-500 dark:text-slate-400 border border-white/50 dark:border-white/5 hover:bg-white/60 dark:hover:bg-white/10"
+                      )}
+                      style={selectedCategoryId === cat.id ? { color: cat.color } : {}}
+                    >
+                      <div className="w-2.5 h-2.5 rounded-full shadow-sm" style={{ backgroundColor: cat.color }} />
+                      {cat.name}
+                    </button>
+                  ));
+                })()}
               </div>
-              <div className="space-y-1">
-                {grouped[date].map(tx => (
-                  <TransactionItem
-                    key={tx.id}
-                    transaction={tx as AnyTx & { isRecurring?: false }}
-                    category={categoryMap.get(tx.categoryId)}
-                    currencies={currencies}
-                    activeCurrencyCode={activeCurrencyCode}
-                    onClick={() => handleClick(tx)}
-                  />
-                ))}
-              </div>
-            </motion.div>
-          ))}
+            </GlassCard>
+          </motion.div>
+
+          {sortedDates.length === 0 ? (
+            <div className="py-20 text-center">
+              <p className="text-slate-500 dark:text-slate-400 font-medium italic">No transactions match this category</p>
+            </div>
+          ) : (
+            sortedDates.map(date => (
+              <motion.div variants={itemVariants} key={date} className="space-y-1">
+                <div className="px-2 py-2 sticky top-[calc(env(safe-area-inset-top,0px)+7.25rem)] md:top-[calc(env(safe-area-inset-top,0px)+5.5rem)] z-10">
+                  <span className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-4">
+                    {format(parseISO(date), 'EEEE, MMMM d')}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {grouped[date].map(tx => (
+                    <TransactionItem
+                      key={tx.id}
+                      transaction={tx as AnyTx & { isRecurring?: false }}
+                      category={categoryMap.get(tx.categoryId)}
+                      currencies={currencies}
+                      activeCurrencyCode={activeCurrencyCode}
+                      onClick={() => handleClick(tx)}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            ))
+          )}
         </motion.div>
       )}
 
