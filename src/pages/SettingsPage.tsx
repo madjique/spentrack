@@ -1,7 +1,6 @@
 import { useSettings } from '../hooks/useSettings';
 import { useCurrency } from '../hooks/useCurrency';
 import { exportAllTransactionsCSV, importTransactionsCSV } from '../utils/csv.utils';
-import type { Category } from '../db/model';
 import { GlassCard } from '../components/ui/GlassCard';
 import { GlassButton } from '../components/ui/GlassButton';
 import { motion } from 'framer-motion';
@@ -37,8 +36,7 @@ export function SettingsPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setImportStatus('Importing...');
-    const catMap = new Map(categories.map((c: Category) => [c.id, c.name]));
-    const result = await importTransactionsCSV(file, catMap);
+    const result = await importTransactionsCSV(file);
     setImportStatus(`Imported ${result.imported} transactions.${result.errors.length > 0 ? ` Errors: ${result.errors.join(', ')}` : ''}`);
     e.target.value = '';
   }
